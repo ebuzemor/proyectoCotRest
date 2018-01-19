@@ -1,0 +1,66 @@
+td,th{
+    font-size:11px;
+}
+p{
+    font-size:11px;
+}
+.header{
+    padding:4px;
+    width:100%;
+    height:78px;
+    border:1px solid #ccc;
+}
+.header h3{
+    text-align:center;
+    font-size:17px;
+    font-family:  "Helvetica Neue", Arial, sans-serif;
+}
+.header p{
+    font-size:11px;
+    text-align:center;
+    margin-bottom: 0rem;
+}
+.subheader{
+    margin-bottom:10px;
+    margin-top:7px;
+    width:100%;
+    height:100px;
+}
+.subheader table td, .subheader table{
+    height:10px;
+    padding:2px;
+    border:1px solid #ccc;
+}
+.subheader p{
+    font-size:12px;
+}
+.header .img_aprosi{
+    float:left;
+    height:65px;
+    width:auto;
+}
+.header .img_copico{
+    float:right;
+    height:65px;
+    width:auto;
+}
+.totales{
+    width:300px;
+    padding-left: 395px;
+}
+.totales table{
+    border:1px solid #808B97;
+}
+.condComerciales p{
+    margin-bottom:0rem;
+}
+.footer{
+    margin-top:50px;
+    width:100%;
+    float:bottom;
+    border-top:1px solid #ccc;
+    margin-bottom:10px;
+}
+.footer p{
+    margin-bottom: 0rem;
+}
