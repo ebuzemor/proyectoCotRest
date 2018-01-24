@@ -333,11 +333,12 @@ class Cotizacion extends Model
             return $error;
     }
 
-    public static function mostrarCotizaciones($claveEF_Inmueble, $fechaInicial, $fechaFinal, $txtCliente, $claveTipoEstatus)
+    public static function mostrarCotizaciones($claveEF_Inmueble,  $claveEF_Responsable, $fechaInicial, $fechaFinal, $txtCliente, $claveTipoEstatus)
     {
         $filtroFechas = "";
         $filtroEstatus = "";
         $filtroCliente = "";
+        $filtroResponsable = "";        
         if($fechaInicial != null && $fechaFinal != null)
             $filtroFechas = " AND cm.fechaEmision BETWEEN '$fechaInicial' AND '$fechaFinal'";
 
@@ -346,6 +347,9 @@ class Cotizacion extends Model
 
         if($claveTipoEstatus != null)
             $filtroEstatus = " AND tc.claveTipoDeStatusDeComprobante = $claveTipoEstatus";
+
+        if($claveEF_Responsable != null)
+            $filtroResponsable= " AND cm.claveEntidadFiscalResponsable = $claveEF_Responsable";
         
         $consulta = DB::connection('copico')->
                     select("
@@ -360,6 +364,7 @@ class Cotizacion extends Model
                         JOIN tiposdestatusdecomprobantes tc USING (claveTipoDeStatusDeComprobante)
                         WHERE tc.claveTipoDeStatusDeComprobante IN (160, 161, 162) AND
                         cm.claveEntidadFiscalInmueble = $claveEF_Inmueble
+                        $filtroResponsable
                         $filtroFechas
                         $filtroCliente
                         $filtroEstatus");

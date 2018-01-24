@@ -97,7 +97,8 @@ class CotizacionController extends Controller
     public function mostrarCotizaciones(Request $request)
     {
         $datos = (object)$request->all();
-        $respuesta = Cotizacion::mostrarCotizaciones($datos->claveEF_Inmueble, $datos->fechaInicial, $datos->fechaFinal, $datos->txtCliente, $datos->claveTipoEstatus);
+        $respuesta = Cotizacion::mostrarCotizaciones($datos->claveEF_Inmueble, $datos->claveEF_Responsable, $datos->fechaInicial,
+                                                     $datos->fechaFinal, $datos->txtCliente, $datos->claveTipoEstatus);
         return response()->json($respuesta, ApiStatus::OK);
     }
 
