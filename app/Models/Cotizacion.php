@@ -333,7 +333,7 @@ class Cotizacion extends Model
             return $error;
     }
 
-    public static function mostrarCotizaciones($claveEF_Inmueble,  $claveEF_Responsable, $fechaInicial, $fechaFinal, $txtCliente, $claveTipoEstatus)
+    public static function mostrarCotizaciones($claveEF_Inmueble, $claveEF_Responsable, $fechaInicial, $fechaFinal, $txtCliente, $claveTipoEstatus)
     {
         $filtroFechas = "";
         $filtroEstatus = "";
