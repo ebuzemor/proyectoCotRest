@@ -29,4 +29,13 @@ class UsuariosController extends Controller
         else
             return response()->json(['usuarios' => 'Sin datos'], ApiStatus::NO_CONTENT);
     }
+
+    public function permisos($claveEF_Empresa, $claveEF_Usuario)
+    {
+        $permisosUsuarios = Usuarios::obtenerPermisos($claveEF_Empresa, $claveEF_Usuario);
+        if($permisosUsuarios != null)
+            return response()->json(['permisos' => $permisosUsuarios], ApiStatus::OK);
+        else
+            return response()->json(['permisos' => 'Sin datos'], ApiStatus::NO_CONTENT);
+    }
 }

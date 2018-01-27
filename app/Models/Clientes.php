@@ -33,7 +33,7 @@ class Clientes extends Model
                                   LEFT JOIN direccionesFiscales AS df ON(ef.claveEntidadFiscal = df.claveEntidadFiscal)
                                   LEFT JOIN estados AS es ON(df.claveEstado = es.claveEstado)
                                   LEFT JOIN paises AS p ON(es.clavePais = p.clavePais)
-                                  LEFT JOIN clientes_vendedores AS cv ON(df.claveEntidadFiscal = cv.claveEntidadFiscalCliente)
+                                  LEFT JOIN clientes_vendedores AS cv ON(ef.claveEntidadFiscal = cv.claveEntidadFiscalCliente)
                                   LEFT JOIN clientes_cobradores AS cco ON(c.claveEntidadFiscalCliente = cco.claveEntidadFiscalCliente)
                                   LEFT JOIN contactos AS con ON c.claveEntidadFiscalCliente = con.claveEntidadFiscalCliente
                                   LEFT JOIN telefonos AS tel ON c.claveEntidadFiscalCliente = tel.claveEntidadFiscal
