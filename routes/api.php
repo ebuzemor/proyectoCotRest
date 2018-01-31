@@ -38,4 +38,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 	Route::post('/enviarMail','CotizacionController@enviarMail');
 	//COTIZACIONES_DESCARGAR_PDF
 	Route::get('/descargarPDF/{claveEF_Empresa}/{claveComprobante}','CotizacionController@descargarPDF');
+	//REPORTES
+	Route::post('/listaCotizacionesUsr', 'ReportesController@listaCotizaciones');
+	Route::post('/reporteCotizacionesUsr', 'ReportesController@reporteCotizaciones');
 });

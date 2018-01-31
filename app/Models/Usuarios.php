@@ -48,7 +48,7 @@ class Usuarios extends Model
     						SELECT s.claveSubmodulo, m.claveModulo, c.claveSeccion, s.nombre, m.descripcion
 							FROM submodulos s
 							JOIN modulos m ON s.claveModulo = m.claveModulo
-							JOIN seccionesdesubmodulos c ON s.claveSubmodulo=c.claveSubmodulo
+							JOIN seccionesdesubmodulos c ON s.claveSubmodulo = c.claveSubmodulo
 							JOIN permisos_seccionesdesubmodulos p ON c.claveSeccion = p.claveSeccion
 							WHERE s.claveAplicacion = 100000005 
 								AND p.claveEntidadFiscalEmpresa = $claveEF_Empresa 

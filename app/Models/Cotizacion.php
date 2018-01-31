@@ -353,7 +353,7 @@ class Cotizacion extends Model
         
         $consulta = DB::connection('copico')->
                     select("
-                        SELECT co.claveComprobanteDeCotizacion, cm.codigoDeComprobante, co.claveEntidadFiscalCliente, 
+                        SELECT co.claveComprobanteDeCotizacion, cm.codigoDeComprobante, co.claveEntidadFiscalCliente, cm.claveEntidadFiscalInmueble,
                         date_format(co.fechaVigencia, '%Y-%m-%d') as fechaVigencia, date_format(cm.fechaEmision, '%Y-%m-%d') as fechaEmision, 
                         ct.codigoDeCliente, ef.rfc, ef.razonSocial, ef.correoElectronico, cm.partidas, tc.descripcion AS estatus,  
                         tc.claveTipoDeStatusDeComprobante AS claveEstatus, co.subtotal, co.descuento, co.impuesto, co.total, co.observaciones
