@@ -37,6 +37,7 @@ class Usuarios extends Model
 									AND us.nickname = '$usuario' 
 									AND us.password = '$password'
 								GROUP BY im.claveEntidadFiscalInmueble
+								ORDER BY im.claveInmueble
 								");
     	return $consulta;
     }
@@ -45,7 +46,12 @@ class Usuarios extends Model
     {
     	$consulta = DB::connection('copico')->
     					select("
-    						SELECT s.claveSubmodulo, m.claveModulo, c.claveSeccion, s.nombre, m.descripcion
+    						SELECT 
+    							s.claveSubmodulo
+    							, m.claveModulo
+    							, c.claveSeccion
+    							, s.nombre
+    							, m.descripcion
 							FROM submodulos s
 							JOIN modulos m ON s.claveModulo = m.claveModulo
 							JOIN seccionesdesubmodulos c ON s.claveSubmodulo = c.claveSubmodulo

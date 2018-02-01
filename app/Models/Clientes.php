@@ -17,14 +17,35 @@ class Clientes extends Model
         $entidadFiscal = EntidadesFiscales::find($ClaveEF_Empresa);        
         $consulta = DB::connection('copico')
                         ->select("SELECT 
-                                  c.claveEntidadFiscalCliente, c.claveEntidadFiscalEmpresa, tc.claveTipoDeCliente, c.codigoDeCliente, tc.nombre AS tipoDeCliente, 
-                                  ef.personaFisica, cc.claveClasificador, cc.descripcion AS clasificador, ef.razonSocial, ef.rfc, ef.correoElectronico, df.municipio,
-                                  df.claveEstado, es.nombre AS estado, p.clavePais, p.nombre AS pais, df.codigoPostal, df.claveDireccionFiscal, df.calle, df.numeroExterior,
-                                  df.numeroInterior, df.colonia, df.localidad, cv.claveEntidadFiscalVendedor, cco.claveEntidadFiscalCobrador, 
-                                  CONCAT(df.calle, ' No.', df.numeroExterior, ', ', df.colonia, ' Cp: ', df.codigoPostal) AS direccion, 
-                                  c.esEspecial AS especial, GROUP_CONCAT(DISTINCT(con.nombre)) AS Contacto, 
-                                  GROUP_CONCAT(DISTINCT(CONCAT(tel.codigoDePais, '-', tel.codigoDeZona, '-', tel.numero, 
-                                    CASE tel.esCelular WHEN tel.esCelular = 1 THEN ' (Cel.)' ELSE CONCAT(' ext.', tel.extension) END))) AS NumeroTelefono
+                                  c.claveEntidadFiscalCliente
+                                  , c.claveEntidadFiscalEmpresa
+                                  , tc.claveTipoDeCliente
+                                  , c.codigoDeCliente
+                                  , tc.nombre AS tipoDeCliente 
+                                  , ef.personaFisica
+                                  , cc.claveClasificador
+                                  , cc.descripcion AS clasificador
+                                  , ef.razonSocial
+                                  , ef.rfc
+                                  , ef.correoElectronico
+                                  , df.municipio
+                                  , df.claveEstado
+                                  , es.nombre AS estado
+                                  , p.clavePais
+                                  , p.nombre AS pais
+                                  , df.codigoPostal
+                                  , df.claveDireccionFiscal
+                                  , df.calle
+                                  , df.numeroExterior
+                                  , df.numeroInterior
+                                  , df.colonia
+                                  , df.localidad
+                                  , IFNULL(cv.claveEntidadFiscalVendedor, 0)
+                                  , IFNULL(cco.claveEntidadFiscalCobrador, 0)
+                                  , CONCAT(df.calle, ' No.', df.numeroExterior, ', ', df.colonia, ' Cp: ', df.codigoPostal) AS direccion
+                                  , c.esEspecial AS especial, GROUP_CONCAT(DISTINCT(con.nombre)) AS Contacto
+                                  , GROUP_CONCAT(DISTINCT(CONCAT(tel.codigoDePais, '-', tel.codigoDeZona, '-', tel.numero
+                                  , CASE tel.esCelular WHEN tel.esCelular = 1 THEN ' (Cel.)' ELSE CONCAT(' ext.', tel.extension) END))) AS NumeroTelefono
                                   FROM clientes AS c
                                   LEFT JOIN tiposDeClientes AS tc ON(c.claveTipoDeCliente = tc.claveTipoDeCliente)
                                   LEFT JOIN clientes_clasificadoresDeClientes AS c_cc ON(c.claveEntidadFiscalCliente = c_cc.claveEntidadFiscalCliente)

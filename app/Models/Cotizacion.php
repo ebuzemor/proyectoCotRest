@@ -340,7 +340,7 @@ class Cotizacion extends Model
         $filtroCliente = "";
         $filtroResponsable = "";        
         if($fechaInicial != null && $fechaFinal != null)
-            $filtroFechas = " AND cm.fechaEmision BETWEEN '$fechaInicial' AND '$fechaFinal'";
+            $filtroFechas = " AND DATE(cm.fechaEmision) BETWEEN '$fechaInicial' AND '$fechaFinal'";
 
         if($txtCliente != null)
             $filtroCliente = " AND (ct.codigoDeCliente LIKE '%$txtCliente%' OR ef.razonSocial LIKE '%$txtCliente%' OR ef.rfc LIKE '%$txtCliente%')";
@@ -414,7 +414,11 @@ class Cotizacion extends Model
                         JOIN codigosdeproductos c ON p.claveProducto = c.claveProducto AND c.claveTipoDeCodigoDeProducto = 1
                         LEFT JOIN detallesdecomprobantes_diasdeentrega e ON d.claveDetalleDeComprobante = e.claveDetalleDeComprobante
                         JOIN (
-                            SELECT p.claveProducto, SUM(c.tasa) AS sumaimpuestos, group_concat(c.tasa) as tasas, group_concat(c.claveImpuesto) as clavesImpuestos
+                            SELECT 
+                                p.claveProducto
+                                , SUM(c.tasa) AS sumaimpuestos
+                                , group_concat(c.tasa) as tasas
+                                , group_concat(c.claveImpuesto) as clavesImpuestos
                             FROM catalogodeproductos p
                             JOIN impuestos_catalogodeproductos i ON p.claveProducto = i.claveProducto
                             JOIN catalogodeimpuestos c ON i.claveImpuesto = c.claveImpuesto
@@ -425,10 +429,19 @@ class Cotizacion extends Model
 
     public static function descargarPDF($claveEF_Empresa, $codigoComprobante)
     {        
-        $sql = "SELECT c.codigoDeComprobante, DATE(c.fechaEmision) AS fechaEmision, ctz.fechaVigencia, cliente.codigoDeCliente, 
-                ctz.subtotal, ctz.descuento, ctz.impuesto, ctz.total, ctz.observaciones, c.partidas, 
-                CONCAT(df.calle,' #', df.numeroExterior, ', Col. ', df.colonia, ', ', df.localidad, ', ', ' ', e.nombre, ', C.P. ', df.codigoPostal) as direccion,
-                CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, ci.importe AS total_impuestos
+        $sql = "SELECT 
+                    c.codigoDeComprobante
+                    , DATE(c.fechaEmision) AS fechaEmision
+                    , ctz.fechaVigencia
+                    , cliente.codigoDeCliente
+                    , ctz.subtotal
+                    , ctz.descuento
+                    , ctz.impuesto
+                    , ctz.total
+                    , ctz.observaciones
+                    , c.partidas
+                    , CONCAT(df.calle,' #', df.numeroExterior, ', Col. ', df.colonia, ', ', df.localidad, ', ', ' ', e.nombre, ', C.P. ', df.codigoPostal) AS direccion
+                    , CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, ci.importe AS total_impuestos
                 FROM cotizaciones AS ctz
                 LEFT JOIN comprobantes AS c ON ctz.claveComprobanteDeCotizacion = c.claveComprobante
                 LEFT JOIN clientes AS cliente ON cliente.claveEntidadFiscalCliente = ctz.claveEntidadFiscalCliente
@@ -444,8 +457,13 @@ class Cotizacion extends Model
 
         $clave = Comprobantes::where('codigoDeComprobante', $codigoComprobante)->first();
 
-        $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad, um.descripcion AS UnidadMedida, 
-                dc.precioUnitario, dc.importe, dc.importeDescuento, dci.claveImpuesto, dci.importe AS impuestos
+        $sql = "SELECT 
+                    dc.numeroDePartida
+                    , cdp.codigoDeProducto
+                    , cp.descripcion
+                    , dc.cantidad
+                    , um.descripcion AS UnidadMedida
+                    , dc.precioUnitario, dc.importe, dc.importeDescuento, dci.claveImpuesto, dci.importe AS impuestos
                 FROM detallesdecomprobantes AS dc
                 LEFT JOIN catalogodeproductos AS cp ON cp.claveProducto = dc.claveProducto
                 LEFT JOIN codigosdeproductos AS cdp ON cdp.claveProducto = dc.claveProducto AND cdp.claveTipoDeCodigoDeProducto = 1

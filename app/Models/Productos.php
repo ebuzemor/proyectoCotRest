@@ -17,67 +17,71 @@ class Productos extends Model
     	$consulta = DB::connection('copico')->
     				select("
 						SELECT SQL_CALC_FOUND_ROWS
-							produc_exis . *, 
-							GROUP_CONCAT(DISTINCT agr_cp.claveAgrupador ORDER BY agr_cp.claveAgrupador) AS clavesAgrupadores, 
-							GROUP_CONCAT(DISTINCT agr.descripcion ORDER BY agr.claveAgrupador) AS agrupadores, 
-							GROUP_CONCAT(DISTINCT agr.claveAgrupadorPadre ORDER BY agr.claveAgrupador) AS clavesAgrupadoresPadre, 
-							GROUP_CONCAT(DISTINCT agrp.descripcion) AS agrupadoresPadre, 
-							cosb.costobase, IFNULL(pck.existenciaPack, 0) AS existenciaPack, 
-							IFNULL(pck.claveProductoPieza, 0) AS claveProductoPieza, 
-							IFNULL(pck.cantidadPieza, 1) AS cantidadPieza
+							produc_exis . *
+							, GROUP_CONCAT(DISTINCT agr_cp.claveAgrupador ORDER BY agr_cp.claveAgrupador) AS clavesAgrupadores
+							, GROUP_CONCAT(DISTINCT agr.descripcion ORDER BY agr.claveAgrupador) AS agrupadores
+							, GROUP_CONCAT(DISTINCT agr.claveAgrupadorPadre ORDER BY agr.claveAgrupador) AS clavesAgrupadoresPadre
+							, GROUP_CONCAT(DISTINCT agrp.descripcion) AS agrupadoresPadre
+							, cosb.costobase
+							, IFNULL(pck.existenciaPack, 0) AS existenciaPack
+							, IFNULL(pck.claveProductoPieza, 0) AS claveProductoPieza
+							, IFNULL(pck.cantidadPieza, 1) AS cantidadPieza
 						FROM
 						 	(SELECT 
-								produc . *,
-								tp.descripcion AS tipoDeProducto,
-								b.cantidadMinimaDeCompra,
-								b.cantidadMinimaDeTraslado,
-								b.cantidadMinimaDeVenta,
-								b.esFraccionable,
-								b.esImportado,
-								b.esParte,
-								b.estaSeriado,
-								b.requiereDatosDeImportacion,
-								b.claveUnidadDeMedida,
-								um.descripcion AS unidadDeMedida,
-								um.abreviatura, IFNULL(cpr.claveTipoDeRedondeo, 0) AS claveTipoDeRedondeo, 
-								IFNULL(pr.precisionDeRedondeo, 0) AS precisionDeRedondeo, SUM(IFNULL(mi.cantidad, 0)) AS existencia
+								produc . *
+								, tp.descripcion AS tipoDeProducto
+								, b.cantidadMinimaDeCompra
+								, b.cantidadMinimaDeTraslado
+								, b.cantidadMinimaDeVenta
+								, b.esFraccionable
+								, b.esImportado
+								, b.esParte
+								, b.estaSeriado
+								, b.requiereDatosDeImportacion
+								, b.claveUnidadDeMedida
+								, um.descripcion AS unidadDeMedida
+								, um.abreviatura
+								, IFNULL(cpr.claveTipoDeRedondeo, 0) AS claveTipoDeRedondeo
+								, IFNULL(pr.precisionDeRedondeo, 0) AS precisionDeRedondeo, SUM(IFNULL(mi.cantidad, 0)) AS existencia
 							FROM
 						 		(SELECT 
-									pvi_imp_precios . *,
-									pb.peso, CONCAT(pb.peso, ' ', umpb.abreviatura) AS pesoYUnidad,
-									umpb.descripcion AS unidadDeMedidaPeso,
-									umpb.abreviatura AS abreviaturaPeso,
-						 			codpIn.codigoDeProducto AS codigoInterno,
-									codpPr.codigoDeProducto AS codigoDeProveedor,
-									codpAn.codigoDeProducto AS codigoAnterior,
-									codpCB.codigoDeProducto AS codigoDeBarras
+									pvi_imp_precios . *
+									, pb.peso, CONCAT(pb.peso, ' ', umpb.abreviatura) AS pesoYUnidad
+									, umpb.descripcion AS unidadDeMedidaPeso
+									, umpb.abreviatura AS abreviaturaPeso
+									, codpIn.codigoDeProducto AS codigoInterno
+									, codpPr.codigoDeProducto AS codigoDeProveedor
+									, codpAn.codigoDeProducto AS codigoAnterior
+									, codpCB.codigoDeProducto AS codigoDeBarras
 								FROM
 						 			(SELECT 
-										pvi_imp.*, cpt.claveCuentaBancaria, cpt.tasa,cpt.mensualidad, 
-										GROUP_CONCAT(ci.claveImpuesto) AS clavesImpuestos, 
-										GROUP_CONCAT(ci.descripcion) AS descripcionImpuestos, 
-										GROUP_CONCAT(ci.tasa) AS tasas, 
-										SUM(ci.tasa) AS sumaImpuestos, 
-										cpt.tasa AS comisionDePagoConTarjeta, 
-										CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) AS precioCom, 
-										SUM(CAST((ci.tasa / 100) * pvi_imp.precioUnitario AS DECIMAL (64, 2))) + pvi_imp.precioUnitario AS precioPublico, 
-										SUM(CAST((ci.tasa / 100) * CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) 
-										AS DECIMAL (64, 2))) + CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) AS precioPublicoCom
+										pvi_imp.*
+										, cpt.claveCuentaBancaria
+										, cpt.tasa,cpt.mensualidad
+										, GROUP_CONCAT(ci.claveImpuesto) AS clavesImpuestos
+										, GROUP_CONCAT(ci.descripcion) AS descripcionImpuestos
+										, GROUP_CONCAT(ci.tasa) AS tasas
+										, SUM(ci.tasa) AS sumaImpuestos
+										, cpt.tasa AS comisionDePagoConTarjeta
+										, CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) AS precioCom
+										, SUM(CAST((ci.tasa / 100) * pvi_imp.precioUnitario AS DECIMAL (64, 2))) + pvi_imp.precioUnitario AS precioPublico
+										, SUM(CAST((ci.tasa / 100) * CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) 
+										  AS DECIMAL (64, 2))) + CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) AS precioPublicoCom
 									FROM
 										(SELECT 
-											pvi . *,
-											pdv.claveListaDePrecios, IFNULL(claveListaDePreciosCliente, - 1) AS claveListaDePreciosCliente, 
-											CAST(pdv.precioUnitario AS DECIMAL (64, 2)) AS precioUnitario,
-											pdv.claveMoneda,
-											m.descripcion AS moneda 
+											pvi . *
+											, pdv.claveListaDePrecios, IFNULL(claveListaDePreciosCliente, - 1) AS claveListaDePreciosCliente
+											, CAST(pdv.precioUnitario AS DECIMAL (64, 2)) AS precioUnitario
+											, pdv.claveMoneda 
+											, m.descripcion AS moneda 
 										FROM 
 											(SELECT 
-												cp.claveProducto,
-						 						TRIM(Replace(Replace(Replace(cp.descripcion,'\t',''),'\n',''),'\r','')) AS descripcion,
-												cp.claveTipoDeProducto,
-						 						-1 AS claveFraccionReenvasable,
-						 						i.claveEntidadFiscalInmueble,
-						 						cpe.claveEntidadFiscalEmpresa
+												cp.claveProducto
+												, TRIM(Replace(Replace(Replace(cp.descripcion,'\t',''),'\n',''),'\r','')) AS descripcion
+												, cp.claveTipoDeProducto
+												, -1 AS claveFraccionReenvasable
+												, i.claveEntidadFiscalInmueble
+												, cpe.claveEntidadFiscalEmpresa
 											FROM CatalogoDeProductos_Empresas AS cpe
 											INNER JOIN Inmuebles AS i USING (claveEntidadFiscalEmpresa)
 											INNER JOIN CatalogoDeProductos AS cp USING (claveProducto)
@@ -86,8 +90,8 @@ class Productos extends Model
 												i.claveEntidadFiscalInmueble = $claveEF_Inmueble) AS pvi
 										LEFT JOIN PreciosDeVenta AS pdv USING (claveProducto)
 										INNER JOIN (SELECT 
-														lp.claveListaDePrecios,
-														lpc.claveListaDePrecios AS claveListaDePreciosCliente
+														lp.claveListaDePrecios
+														, lpc.claveListaDePrecios AS claveListaDePreciosCliente
 													FROM listasdeprecios AS lp
 													LEFT JOIN listasdeprecios_clientes AS lpc 
 														ON (lpc.claveListaDePrecios = lp.claveListaDePrecios AND lpc.claveEntidadFiscalCliente = $claveEF_Cliente)
@@ -140,8 +144,9 @@ class Productos extends Model
 							LEFT JOIN costobase AS cosb ON agr_cp.claveProducto = cosb.claveProducto
 							LEFT JOIN
 								(SELECT
-									p.clavePack AS clavePack, ROUND(SUM(IFNULL(mi.cantidad, 0)) / IFNULL(p.cantidad, 1), 4) AS existenciaPack, 
-									IFNULL(p.claveProducto, 0) AS claveProductoPieza, IFNULL(p.cantidad, 1) AS cantidadPieza
+									p.clavePack AS clavePack
+									, ROUND(SUM(IFNULL(mi.cantidad, 0)) / IFNULL(p.cantidad, 1), 4) AS existenciaPack
+									, IFNULL(p.claveProducto, 0) AS claveProductoPieza, IFNULL(p.cantidad, 1) AS cantidadPieza
 								 FROM packs AS p
 								 LEFT JOIN movimientosdeinventarios AS mi ON (p.claveProducto = mi.claveProducto)
 								 WHERE
