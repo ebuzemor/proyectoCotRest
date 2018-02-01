@@ -353,10 +353,26 @@ class Cotizacion extends Model
         
         $consulta = DB::connection('copico')->
                     select("
-                        SELECT co.claveComprobanteDeCotizacion, cm.codigoDeComprobante, co.claveEntidadFiscalCliente, cm.claveEntidadFiscalInmueble,
-                        date_format(co.fechaVigencia, '%Y-%m-%d') as fechaVigencia, date_format(cm.fechaEmision, '%Y-%m-%d') as fechaEmision, 
-                        ct.codigoDeCliente, ef.rfc, ef.razonSocial, ef.correoElectronico, cm.partidas, tc.descripcion AS estatus,  
-                        tc.claveTipoDeStatusDeComprobante AS claveEstatus, co.subtotal, co.descuento, co.impuesto, co.total, co.observaciones
+                        SELECT 
+                            co.claveComprobanteDeCotizacion
+                            , cm.codigoDeComprobante
+                            , co.claveEntidadFiscalCliente
+                            , cm.claveEntidadFiscalInmueble 
+                            , cm.claveEntidadFiscalResponsable
+                            , date_format(co.fechaVigencia, '%Y-%m-%d') as fechaVigencia
+                            , date_format(cm.fechaEmision, '%Y-%m-%d') as fechaEmision 
+                            , ct.codigoDeCliente
+                            , ef.rfc
+                            , ef.razonSocial
+                            , ef.correoElectronico
+                            , cm.partidas
+                            , tc.descripcion AS estatus 
+                            , tc.claveTipoDeStatusDeComprobante AS claveEstatus
+                            , co.subtotal
+                            , co.descuento
+                            , co.impuesto
+                            , co.total
+                            , co.observaciones
                         FROM cotizaciones co
                         JOIN comprobantes cm ON co.claveComprobanteDeCotizacion = cm.claveComprobante
                         JOIN clientes ct USING (claveEntidadFiscalCliente)
@@ -375,12 +391,22 @@ class Cotizacion extends Model
     {
         $consulta = DB::connection('copico')->
                     select("
-                        SELECT d.claveDetalleDeComprobante, d.claveProducto, p.descripcion, b.esImportado, x.sumaimpuestos, x.tasas, x.clavesImpuestos,
-                        c.codigoDeProducto as codigoInterno, ROUND(d.precioUnitario, 2) AS precioUnitario,  ROUND(d.cantidad, 2) as cantidad, 
-                        ROUND(d.importeDescuento, 2) AS importeDescuento, ROUND(d.importe, 2) AS importe, 
-                        ROUND((d.importe - d.importeDescuento) * x.sumaimpuestos/100, 2) AS impuestos, 
-                        ROUND((d.importe - d.importeDescuento) + ((d.importe - d.importeDescuento) * x.sumaimpuestos/100), 2) AS subtotal,
-                        IFNULL(e.diasDeEntrega, 0) AS diasdeentrega
+                        SELECT 
+                            d.claveDetalleDeComprobante
+                            , d.claveProducto
+                            , p.descripcion
+                            , b.esImportado
+                            , x.sumaimpuestos
+                            , x.tasas
+                            , x.clavesImpuestos 
+                            , c.codigoDeProducto as codigoInterno
+                            , ROUND(d.precioUnitario, 2) AS precioUnitario
+                            , ROUND(d.cantidad, 2) as cantidad
+                            , ROUND(d.importeDescuento, 2) AS importeDescuento
+                            , ROUND(d.importe, 2) AS importe 
+                            , ROUND((d.importe - d.importeDescuento) * x.sumaimpuestos/100, 2) AS impuestos
+                            , ROUND((d.importe - d.importeDescuento) + ((d.importe - d.importeDescuento) * x.sumaimpuestos/100), 2) AS subtotal 
+                            , IFNULL(e.diasDeEntrega, 0) AS diasdeentrega
                         FROM detallesdecomprobantes d
                         JOIN bienes b ON d.claveProducto = b.claveProducto
                         JOIN catalogodeproductos p ON d.claveProducto = p.claveProducto
