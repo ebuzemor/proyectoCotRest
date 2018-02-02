@@ -432,7 +432,7 @@ class Cotizacion extends Model
         $sql = "SELECT 
                     c.codigoDeComprobante
                     , DATE(c.fechaEmision) AS fechaEmision
-                    , ctz.fechaVigencia
+                    , DATE(ctz.fechaVigencia) AS fechaVigencia
                     , cliente.codigoDeCliente
                     , ctz.subtotal
                     , ctz.descuento
@@ -463,7 +463,11 @@ class Cotizacion extends Model
                     , cp.descripcion
                     , dc.cantidad
                     , um.descripcion AS UnidadMedida
-                    , dc.precioUnitario, dc.importe, dc.importeDescuento, dci.claveImpuesto, dci.importe AS impuestos
+                    , dc.precioUnitario
+                    , dc.importe
+                    , dc.importeDescuento
+                    , dci.claveImpuesto
+                    , dci.importe AS impuestos
                 FROM detallesdecomprobantes AS dc
                 LEFT JOIN catalogodeproductos AS cp ON cp.claveProducto = dc.claveProducto
                 LEFT JOIN codigosdeproductos AS cdp ON cdp.claveProducto = dc.claveProducto AND cdp.claveTipoDeCodigoDeProducto = 1
@@ -475,7 +479,7 @@ class Cotizacion extends Model
         /* DIAS DE ENTREGA */
         $diasDeEntrega = DB::connection('copico')
                             ->select("
-                                SELECT MAX(dcde.diasDeEntrega) AS diasDeEntrega 
+                                SELECT IFNULL(MAX(dcde.diasDeEntrega), 0) AS diasDeEntrega 
                                 FROM detallesdecomprobantes AS dc
                                 LEFT JOIN detallesdecomprobantes_diasdeentrega AS dcde ON dc.claveDetalleDeComprobante = dcde.claveDetalleDeComprobante
                                 WHERE claveComprobante = $clave->claveComprobante");
@@ -483,8 +487,8 @@ class Cotizacion extends Model
         $sumarDias = $diasDeEntrega[0]->diasDeEntrega;
         $date = $comprobantes[0]->fechaEmision;
         //Incrementando dias
-        $mod_date = strtotime($date."+ ".$sumarDias."days");
-        $fechaEntrega = date('Y-m-d',$mod_date);    
+        $mod_date = strtotime($date." + ".$sumarDias."days");
+        $fechaEntrega = date('Y-m-d', $mod_date);    
 
         /*CONDICIONES COMERCIALES*/
         $condComCTZ = CondicionesComercialesCtz::where('claveEntidadFiscalEmpresa', $claveEF_Empresa)->first();        
