@@ -166,7 +166,7 @@ class Productos extends Model
     				select("
     					SELECT IFNULL(p.claveProducto, 'no hay') AS claveProducto
 						, IFNULL(p.descripcion, 'no hay') AS descripcion
-						, IFNULL(CAST(m.cantidad AS DECIMAL(10,2)), 0) AS cantidad 
+						, SUM(COALESCE(CAST(m.cantidad AS DECIMAL(10,2)), 0)) AS cantidad
 						, IFNULL(i.nombreCorto, 'no hay') AS sucursal
 						FROM catalogodeproductos p
 						LEFT JOIN movimientosdeinventarios m ON p.claveProducto = m.claveProducto
