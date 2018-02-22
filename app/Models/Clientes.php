@@ -40,8 +40,8 @@ class Clientes extends Model
                                   , df.numeroInterior
                                   , df.colonia
                                   , df.localidad
-                                  , IFNULL(cv.claveEntidadFiscalVendedor, 0)
-                                  , IFNULL(cco.claveEntidadFiscalCobrador, 0)
+                                  , IFNULL(cv.claveEntidadFiscalVendedor, 0) AS claveEntidadFiscalVendedor
+                                  , IFNULL(cco.claveEntidadFiscalCobrador, 0) AS claveEntidadFiscalCobrador
                                   , CONCAT(df.calle, ' No.', df.numeroExterior, ', ', df.colonia, ' Cp: ', df.codigoPostal) AS direccion
                                   , c.esEspecial AS especial, GROUP_CONCAT(DISTINCT(con.nombre)) AS Contacto
                                   , GROUP_CONCAT(DISTINCT(CONCAT(tel.codigoDePais, '-', tel.codigoDeZona, '-', tel.numero
