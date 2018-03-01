@@ -177,4 +177,35 @@ class Productos extends Model
     					");
     	return $consulta;
 	}
+
+	public static function sincronizarCatalogo($claveEF_Inmueble)
+	{
+		$filtroInmueble = "";
+		if($claveEF_Inmueble != null && $claveEF_Inmueble != 0)
+			$filtroInmueble = " WHERE m.claveEntidadFiscalInmueble = $claveEF_Inmueble";
+
+		$consulta = DB::connection('copico')->
+					select("
+						SELECT c.claveProducto AS sku
+						, CAST(COALESCE(SUM(m.cantidad)/(SELECT COUNT(*) FROM listasdeprecios), 0) AS DECIMAL(64,2)) AS qty
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 1 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS price
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 2 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 2'
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 3 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 3'
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 4 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 4'
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 5 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 5'
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 6 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 6'
+						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 7 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 7'
+						, COALESCE(b.use_config_backorders, 0) AS use_config_backorders
+						, COALESCE(v.status, 0) AS status
+						FROM catalogodeproductos c
+						LEFT JOIN movimientosdeinventarios m ON c.claveProducto = m.claveProducto
+						LEFT JOIN preciosdeventa p ON c.claveProducto = p.claveProducto
+						LEFT JOIN listasdeprecios l ON p.claveListaDePrecios = l.claveListaDePrecios
+						LEFT JOIN backordersdeproductos_web b ON c.claveProducto = b.claveproducto
+						LEFT JOIN visibilidaddeproductos_web v ON c.claveProducto = v.claveproducto
+						$filtroInmueble
+						GROUP BY c.claveProducto
+						");
+		return $consulta;
+	}
 }

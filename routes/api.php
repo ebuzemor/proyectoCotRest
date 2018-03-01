@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 Route::post('/login', 'UsuariosController@login');
 Route::group(['middleware' => 'auth:api'], function() {
-
 	//USUARIOS
 	Route::get('/buscarUsuario/{claveEF_Empresa}/{usuario}/{password}', 'UsuariosController@buscar');
 	Route::get('/permisosUsuario/{claveEF_Empresa}/{claveEF_Usuario}', 'UsuariosController@permisos');
@@ -24,6 +23,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 	//PRODUCTOS
 	Route::get('/buscarProductos/{claveEF_Inmueble}/{claveEF_Cliente}/{txtBusqueda}', 'ProductosController@buscarProductos');
 	Route::get('/buscarExistencias/{claveEF_Empresa}/{claveProducto}', 'ProductosController@buscarExistencias');
+	Route::post('/sincronizarCatalogo', 'ProductosController@sincronizarCatalogo');
 	//SUCURSALES
 	Route::get('/listaSucursales/{claveEF_Empresa}', 'InmueblesController@listaSucursales');
 	Route::get('/obtenerSucursal/{claveEF_Inmueble}', 'InmueblesController@obtenerSucursal');
