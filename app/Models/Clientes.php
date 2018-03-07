@@ -59,7 +59,8 @@ class Clientes extends Model
                                   LEFT JOIN contactos AS con ON c.claveEntidadFiscalCliente = con.claveEntidadFiscalCliente
                                   LEFT JOIN telefonos AS tel ON c.claveEntidadFiscalCliente = tel.claveEntidadFiscal
                                   WHERE c.claveEntidadFiscalEmpresa = $ClaveEF_Empresa AND ef.rfc != '$entidadFiscal->rfc' 
-                                  AND (c.codigoDeCliente LIKE '%$txtBusqueda%' OR ef.razonSocial LIKE '%$txtBusqueda%' OR ef.rfc LIKE '%$txtBusqueda%')
+                                  AND (c.codigoDeCliente LIKE '%$txtBusqueda%' OR ef.razonSocial LIKE '%$txtBusqueda%' OR ef.rfc LIKE '%$txtBusqueda%' 
+                                       OR ef.correoElectronico LIKE '%$txtBusqueda%')
                                   GROUP BY c.claveEntidadFiscalCliente, tc.nombre, cc.claveClasificador, cv.claveEntidadFiscalVendedor, cco.claveEntidadFiscalCobrador");
         return $consulta;
     }

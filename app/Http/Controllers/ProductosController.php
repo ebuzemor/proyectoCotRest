@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Productos;
 use App\MyClass\ApiStatus;
 use Excel;
+use Storage;
+use Illuminate\Http\File;
 
 class ProductosController extends Controller
 {
@@ -28,21 +30,59 @@ class ProductosController extends Controller
 
     public function sincronizarCatalogo(Request $request)
     {
-        /*$catalogo = Productos::sincronizarCatalogo($request->claveEF_Inmueble)->toArray();
-        //return response()->json($catalogo, ApiStatus::OK);
-        /*$datos[] = ['sku', 'qty', 'price', 'group_price:Lista 2', 'group_price:Lista 3', 'group_price:Lista 4', 
-                    'group_price:Lista 5', 'group_price:Lista 6', 'group_price:Lista 7', 'use_config_backorders', 'status'];
-        foreach ($catalogo as $cat) {
-            $datos[] += ;
-        }
-        return $datos;*/
-        $datos = Productos::all()->toArray();
-        return Excel::create('prueba', function($excel) use($datos)
+        # Se genera la información a partir de la consulta        
+        $catalogo = Productos::sincronizarCatalogo($request->claveEF_Inmueble);
+        # Los datos obtenidos se convierten a una estructura de arreglos
+        $datos = $this->object_to_array($catalogo);
+        # Se genera el archivo CSV en la carpeta de storage
+        Excel::create('aprosi_catalogo_sync_'.$request->claveEF_Inmueble, function($excel) use($datos)
         {
             $excel->sheet('Catalogo', function($sheet) use($datos)
             {
-                $sheet->fromModel($datos);
+                $sheet->fromArray($datos);
             });
-        })->download('csv');
+        })->store('csv', storage_path('excel/exports'));
+        # Se obtiene el nombre automático del archivo y la ruta donde fue guardado      
+        $archivo = 'aprosi_catalogo_sync_'.$request->claveEF_Inmueble.'.csv';
+        $path = storage_path('excel\exports').'\\'.$archivo;
+        # Se sube el archivo al servidor FTP con las credenciales previamente configuradas
+        $subida = Storage::disk('ftp')->putFileAs('/', new File($path), $archivo);        
+        return $subida;
+    }
+
+    public function ejecutarSincronizacion()
+    {
+        # Se genera la información a partir de la consulta        
+        $catalogo = Productos::sincronizarCatalogo(300000108);
+        # Los datos obtenidos se convierten a una estructura de arreglos
+        $datos = $this->object_to_array($catalogo);
+        # Se genera el archivo CSV en la carpeta de storage
+        Excel::create('aprosi_catalogo_sync_300000108', function($excel) use($datos)
+        {
+            $excel->sheet('Catalogo', function($sheet) use($datos)
+            {
+                $sheet->fromArray($datos);
+            });
+        })->store('csv', storage_path('excel/exports'));
+        # Se obtiene el nombre automático del archivo y la ruta donde fue guardado      
+        $archivo = 'aprosi_catalogo_sync_300000108.csv';
+        $path = storage_path('excel\exports').'\\'.$archivo;
+        # Se sube el archivo al servidor FTP con las credenciales previamente configuradas
+        $subida = Storage::disk('ftp')->putFileAs('/', new File($path), $archivo);        
+        return $subida;
+    }
+
+    public function object_to_array($data) 
+    {
+        if(is_array($data) || is_object($data))
+        {
+            $result = array();
+            foreach($data as $key => $value) 
+            {
+                $result[$key] = $this->object_to_array($value);
+            }
+            return $result;
+        }
+        return $data;
     }
 }

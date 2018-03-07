@@ -51,7 +51,8 @@ class Usuarios extends Model
     							, m.claveModulo
     							, c.claveSeccion
     							, s.nombre
-    							, m.descripcion
+    							, s.descripcion
+    							, c.constante
 							FROM submodulos s
 							JOIN modulos m ON s.claveModulo = m.claveModulo
 							JOIN seccionesdesubmodulos c ON s.claveSubmodulo = c.claveSubmodulo

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::post('/login', 'UsuariosController@login');
+Route::get('/ejecutarSincronizacion', 'ProductosController@ejecutarSincronizacion');
 Route::group(['middleware' => 'auth:api'], function() {
 	//USUARIOS
 	Route::get('/buscarUsuario/{claveEF_Empresa}/{usuario}/{password}', 'UsuariosController@buscar');

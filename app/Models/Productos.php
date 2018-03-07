@@ -69,7 +69,7 @@ class Productos extends Model
 										  AS DECIMAL (64, 2))) + CAST(((1 + (0 / 100)) * pvi_imp.precioUnitario) AS DECIMAL (64, 2)) AS precioPublicoCom
 									FROM
 										(SELECT 
-											pvi . *
+											pvi.*
 											, pdv.claveListaDePrecios, IFNULL(claveListaDePreciosCliente, - 1) AS claveListaDePreciosCliente
 											, CAST(pdv.precioUnitario AS DECIMAL (64, 2)) AS precioUnitario
 											, pdv.claveMoneda 

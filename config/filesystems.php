@@ -63,6 +63,13 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        'ftp' => [
+            'driver' => 'ftp',
+            'host' => '77.104.152.233',
+            'username' => 'aprosierp@sixplus1.mx',
+            'password' => '(06tn@Hd]*b_'
+        ],
+
     ],
 
 ];
