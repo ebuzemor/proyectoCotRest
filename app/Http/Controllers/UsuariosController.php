@@ -38,4 +38,31 @@ class UsuariosController extends Controller
         else
             return response()->json(['permisos' => 'Sin datos'], ApiStatus::NO_CONTENT);
     }
+
+    public function cargarPermisos($claveAplicacion)
+    {
+        $permisos = Usuarios::cargarPermisos($claveAplicacion);
+        if($permisos != null)
+            return response()->json(['acciones' => $permisos], ApiStatus::OK);
+        else
+            return response()->json(['acciones' => 'Sin datos'], ApiStatus::NO_CONTENT);
+    }
+
+    /*public function obtenerProcesos($claveEF_Usuario)
+    {
+        $procesosAutorizados = Usuarios::obtenerProcesosAutorizados($claveEF_Usuario);
+        if($procesosAutorizados != null)
+            return response()->json(['procesosAutorizados' => $procesosAutorizados], ApiStatus::OK);
+        else 
+            return response()->json(['procesosAutorizados' => 'Sin datos'], ApiStatus::NO_CONTENT);
+    }
+
+    public function cargarProcesos($claveAplicacion)
+    {
+        $cargarProcesos = Usuarios::cargarProcesosAutorizados($claveAplicacion);
+        if($cargarProcesos != null)
+            return response()->json(['cargarProcesos' => $cargarProcesos], ApiStatus::OK);
+        else
+            return response()->json(['cargarProcesos' => 'Sin datos'], ApiStatus::NO_CONTENT);
+    }*/
 }

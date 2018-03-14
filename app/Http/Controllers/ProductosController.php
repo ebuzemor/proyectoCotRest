@@ -42,7 +42,7 @@ class ProductosController extends Controller
                 $sheet->fromArray($datos);
             });
         })->store('csv', storage_path('excel/exports'));
-        # Se obtiene el nombre automático del archivo y la ruta donde fue guardado      
+        # Se obtiene el nombre automático del archivo y la ruta donde fue guardado
         $archivo = 'aprosi_catalogo_sync_'.$request->claveEF_Inmueble.'.csv';
         $path = storage_path('excel\exports').'\\'.$archivo;
         # Se sube el archivo al servidor FTP con las credenciales previamente configuradas

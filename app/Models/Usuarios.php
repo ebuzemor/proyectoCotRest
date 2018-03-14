@@ -47,20 +47,59 @@ class Usuarios extends Model
     	$consulta = DB::connection('copico')->
     					select("
     						SELECT 
-    							s.claveSubmodulo
-    							, m.claveModulo
-    							, c.claveSeccion
-    							, s.nombre
-    							, s.descripcion
-    							, c.constante
+								c.claveSeccion
+								, c.claveSubmodulo
+								, c.descripcion 
+								, c.constante
 							FROM submodulos s
 							JOIN modulos m ON s.claveModulo = m.claveModulo
 							JOIN seccionesdesubmodulos c ON s.claveSubmodulo = c.claveSubmodulo
 							JOIN permisos_seccionesdesubmodulos p ON c.claveSeccion = p.claveSeccion
-							WHERE s.claveAplicacion = 100000005 
+							WHERE s.claveAplicacion = 100000005  
 								AND p.claveEntidadFiscalEmpresa = $claveEF_Empresa 
 								AND p.claveEntidadFiscalUsuario = $claveEF_Usuario
     						");
     	return $consulta;
     }
+
+    public static function cargarPermisos($claveAplicacion)
+    {
+    	$consulta = DB::connection('copico')->
+    					select("
+    						SELECT 
+								s.claveSeccion
+								, b.claveSubmodulo
+								, s.descripcion
+								, s.constante
+							FROM seccionesdesubmodulos s
+							JOIN submodulos b ON s.claveSubmodulo=b.claveSubmodulo
+							WHERE b.claveAplicacion = $claveAplicacion
+    						");
+    	return $consulta;
+    }
+
+    /*public static function obtenerProcesosAutorizados($claveEF_Usuario)
+    {
+    	$consulta = DB::connection('copico')->
+    					select("
+    						SELECT u.claveProceso, u.claveSubmodulo, p.proceso, p.descripcionProceso
+							FROM usuariosprocesosautorizacion u
+							JOIN procesosconautorizacion p ON u.claveProceso=p.claveProceso
+							JOIN submodulos s ON u.claveSubmodulo=s.claveSubmodulo
+							WHERE s.claveAplicacion = 100000005 AND u.claveEntidadFiscalUsuario = $claveEF_Usuario
+    						");
+    	return $consulta;
+    }
+
+    public static function cargarProcesosAutorizados($claveAplicacion)
+    {
+    	$consulta = DB::connection('copico')->
+    					select("
+    						SELECT p.claveProceso, p.proceso, p.descripcionProceso
+							FROM procesosconautorizacion p
+							JOIN submodulos s ON p.claveSubmodulo=s.claveSubmodulo
+							WHERE s.claveAplicacion = $claveAplicacion
+    						");
+    	return $consulta;
+    }*/
 }

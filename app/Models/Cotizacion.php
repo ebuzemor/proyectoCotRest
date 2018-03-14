@@ -429,19 +429,10 @@ class Cotizacion extends Model
 
     public static function descargarPDF($claveEF_Empresa, $codigoComprobante)
     {        
-        $sql = "SELECT 
-                    c.codigoDeComprobante
-                    , DATE(c.fechaEmision) AS fechaEmision
-                    , DATE(ctz.fechaVigencia) AS fechaVigencia
-                    , cliente.codigoDeCliente
-                    , ctz.subtotal
-                    , ctz.descuento
-                    , ctz.impuesto
-                    , ctz.total
-                    , ctz.observaciones
-                    , c.partidas
-                    , CONCAT(df.calle,' #', df.numeroExterior, ', Col. ', df.colonia, ', ', df.localidad, ', ', ' ', e.nombre, ', C.P. ', df.codigoPostal) AS direccion
-                    , CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, ci.importe AS total_impuestos
+        $sql = "SELECT c.codigoDeComprobante, DATE(c.fechaEmision) AS fechaEmision, ctz.fechaVigencia, cliente.codigoDeCliente, 
+                ctz.subtotal, ctz.descuento, ctz.impuesto, ctz.total, ctz.observaciones, c.partidas, 
+                CONCAT(df.calle,' #', df.numeroExterior, ', Col. ', df.colonia, ', ', df.localidad, ', ', ' ', e.nombre, ', C.P. ', df.codigoPostal) as direccion,
+                CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, ci.importe AS total_impuestos
                 FROM cotizaciones AS ctz
                 LEFT JOIN comprobantes AS c ON ctz.claveComprobanteDeCotizacion = c.claveComprobante
                 LEFT JOIN clientes AS cliente ON cliente.claveEntidadFiscalCliente = ctz.claveEntidadFiscalCliente
@@ -457,17 +448,8 @@ class Cotizacion extends Model
 
         $clave = Comprobantes::where('codigoDeComprobante', $codigoComprobante)->first();
 
-        $sql = "SELECT 
-                    dc.numeroDePartida
-                    , cdp.codigoDeProducto
-                    , cp.descripcion
-                    , dc.cantidad
-                    , um.descripcion AS UnidadMedida
-                    , dc.precioUnitario
-                    , dc.importe
-                    , dc.importeDescuento
-                    , dci.claveImpuesto
-                    , dci.importe AS impuestos
+        $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad, um.descripcion AS UnidadMedida, 
+                dc.precioUnitario, dc.importe, dc.importeDescuento, dci.claveImpuesto, dci.importe AS impuestos
                 FROM detallesdecomprobantes AS dc
                 LEFT JOIN catalogodeproductos AS cp ON cp.claveProducto = dc.claveProducto
                 LEFT JOIN codigosdeproductos AS cdp ON cdp.claveProducto = dc.claveProducto AND cdp.claveTipoDeCodigoDeProducto = 1
@@ -477,25 +459,30 @@ class Cotizacion extends Model
         $detallesComprobantes =  DB::connection('copico')->select($sql, array($clave->claveComprobante));
 
         /* DIAS DE ENTREGA */
-        $diasDeEntrega = DB::connection('copico')
-                            ->select("
-                                SELECT IFNULL(MAX(dcde.diasDeEntrega), 0) AS diasDeEntrega 
-                                FROM detallesdecomprobantes AS dc
-                                LEFT JOIN detallesdecomprobantes_diasdeentrega AS dcde ON dc.claveDetalleDeComprobante = dcde.claveDetalleDeComprobante
-                                WHERE claveComprobante = $clave->claveComprobante");
+        $diasDeEntrega=DB::connection('copico')
+        ->select("select IFNULL(max(dcde.diasDeEntrega),0) as diasDeEntrega from detallesdecomprobantes as dc
+        left join detallesdecomprobantes_diasdeentrega as dcde
+        on dc.claveDetalleDeComprobante= dcde.claveDetalleDeComprobante
+        where claveComprobante=$clave->claveComprobante");
 
-        $sumarDias = $diasDeEntrega[0]->diasDeEntrega;
-        $date = $comprobantes[0]->fechaEmision;
-        //Incrementando dias
-        $mod_date = strtotime($date." + ".$sumarDias."days");
-        $fechaEntrega = date('Y-m-d', $mod_date);    
-
-        /*CONDICIONES COMERCIALES*/
+        if($diasDeEntrega[0]->diasDeEntrega == 0)
+        {
+            $fechaEntrega=$comprobantes[0]->fechaVigencia;
+        }               
+        else
+        {
+            //SE SUMAN LOS DIAS DE ENTREGA          
+            $mod_date = strtotime($comprobantes[0]->fechaEmision."+ ".$diasDeEntrega[0]->diasDeEntrega."days");
+            $fechaEntrega = date('Y-m-d',$mod_date);  
+        }
+                                             
+        /* CONDICIONES COMERCIALES */
         $condComCTZ = CondicionesComercialesCtz::where('claveEntidadFiscalEmpresa', $claveEF_Empresa)->first();        
         $condComercial = explode("\n", $condComCTZ->condicionComercial);
 
-        /*GENERA EL PDF*/
-        $pdf = PDF::loadView('pdfView', compact('detallesComprobantes', 'comprobantes', 'condComercial', 'fechaEntrega'));
+        /* GENERA EL PDF */
+        $observaciones = explode("\n",$comprobantes[0]->observaciones);
+        $pdf = PDF::loadView('pdfView', compact('detallesComprobantes', 'comprobantes', 'condComercial','fechaEntrega','observaciones'));
         return $pdf;
     }
 }

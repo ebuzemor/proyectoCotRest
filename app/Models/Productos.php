@@ -182,11 +182,11 @@ class Productos extends Model
 	{
 		$filtroInmueble = "";
 		if($claveEF_Inmueble != null && $claveEF_Inmueble != 0)
-			$filtroInmueble = " WHERE m.claveEntidadFiscalInmueble = $claveEF_Inmueble";
+			$filtroInmueble = " AND m.claveEntidadFiscalInmueble = $claveEF_Inmueble";
 
 		$consulta = DB::connection('copico')->
 					select("
-						SELECT c.claveProducto AS sku
+						SELECT c.codigodeproducto AS sku
 						, CAST(COALESCE(SUM(m.cantidad)/(SELECT COUNT(*) FROM listasdeprecios), 0) AS DECIMAL(64,2)) AS qty
 						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 1 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS price
 						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 2 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 2'
@@ -197,12 +197,15 @@ class Productos extends Model
 						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 7 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 7'
 						, COALESCE(b.use_config_backorders, 0) AS use_config_backorders
 						, COALESCE(v.status, 0) AS status
-						FROM catalogodeproductos c
+						FROM codigosdeproductos c
 						LEFT JOIN movimientosdeinventarios m ON c.claveProducto = m.claveProducto
 						LEFT JOIN preciosdeventa p ON c.claveProducto = p.claveProducto
 						LEFT JOIN listasdeprecios l ON p.claveListaDePrecios = l.claveListaDePrecios
 						LEFT JOIN backordersdeproductos_web b ON c.claveProducto = b.claveproducto
 						LEFT JOIN visibilidaddeproductos_web v ON c.claveProducto = v.claveproducto
+						WHERE c.claveTipoDeCodigoDeProducto = 1
+						AND c.claveProducto NOT IN(300002167,300002818,300002241,300001673,300002436,300001671,300002259,300001776,300002125,300002054,
+						300002892,300002392,300002173,300000357,300000727,300002847)
 						$filtroInmueble
 						GROUP BY c.claveProducto
 						");

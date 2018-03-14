@@ -85,10 +85,10 @@
             </div>
         </div>
         <div class="observ">
-            <p class="text-center"><strong>OBSERVACIONES</strong></p>            
-            @foreach($comprobantes as $row)
-            <p class="text-center">{{$row->observaciones}}</p>
-            @endforeach
+            <p><strong>OBSERVACIONES</strong></p>            
+                @for ($i = 0; $i < count($observaciones);  $i++)
+                    <div class="sub_observ" >{{$observaciones[$i]}}</div>
+                @endfor
         </div>       
         <div class="footer">
             <p class="text-center">APROSI EQUIPOS SA DE CV</p>     

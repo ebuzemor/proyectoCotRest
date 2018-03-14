@@ -19,6 +19,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 	//USUARIOS
 	Route::get('/buscarUsuario/{claveEF_Empresa}/{usuario}/{password}', 'UsuariosController@buscar');
 	Route::get('/permisosUsuario/{claveEF_Empresa}/{claveEF_Usuario}', 'UsuariosController@permisos');
+	Route::get('/cargarPermisos/{claveAplicacion}', 'UsuariosController@cargarPermisos');
 	//CLIENTES
 	Route::get('/buscarClientes/{claveEF_Empresa}/{txtBusqueda}', 'ClientesController@buscar');
 	//PRODUCTOS
