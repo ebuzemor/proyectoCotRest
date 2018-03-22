@@ -66,7 +66,7 @@ class ProductosController extends Controller
         })->store('csv', storage_path('excel/exports'));
         # Se obtiene el nombre automático del archivo y la ruta donde fue guardado      
         $archivo = 'aprosi_catalogo_sync_300000108.csv';
-        $path = storage_path('excel\exports').'\\'.$archivo;
+        $path = storage_path('excel/exports').'//'.$archivo;
         # Se sube el archivo al servidor FTP con las credenciales previamente configuradas
         $subida = Storage::disk('ftp')->putFileAs('/', new File($path), $archivo);        
         return $subida;

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Usuarios;
 use App\MyClass\ApiStatus;
+use App\Models\PermisosSeccionesdeSubmodulos;
 use Auth;
 use Validator;
+use DB;
 
 class UsuariosController extends Controller
 {    
@@ -48,21 +50,38 @@ class UsuariosController extends Controller
             return response()->json(['acciones' => 'Sin datos'], ApiStatus::NO_CONTENT);
     }
 
-    /*public function obtenerProcesos($claveEF_Usuario)
+    public function obtenerUsuarios($txtBusqueda)
     {
-        $procesosAutorizados = Usuarios::obtenerProcesosAutorizados($claveEF_Usuario);
-        if($procesosAutorizados != null)
-            return response()->json(['procesosAutorizados' => $procesosAutorizados], ApiStatus::OK);
-        else 
-            return response()->json(['procesosAutorizados' => 'Sin datos'], ApiStatus::NO_CONTENT);
+        $usuarios = Usuarios::obtenerListaUsuarios($txtBusqueda);
+        if($usuarios != null)
+            return response()->json(['datosUsuarios' => $usuarios], ApiStatus::OK);
+        else
+            return response()->json(['datosUsuarios' => 'Sin datos'], ApiStatus::NO_CONTENT);
     }
 
-    public function cargarProcesos($claveAplicacion)
+    public function guardarPermisos(Request $request)
     {
-        $cargarProcesos = Usuarios::cargarProcesosAutorizados($claveAplicacion);
-        if($cargarProcesos != null)
-            return response()->json(['cargarProcesos' => $cargarProcesos], ApiStatus::OK);
+        $input = $request->all();
+        $usrpermisos = (object)$input;
+        $borrados = PermisosSeccionesdeSubmodulos::where('claveSeccion', '>=', 27)
+                    ->where('claveEntidadFiscalEmpresa', $usrpermisos->ClaveEFEmpresa)
+                    ->where('claveEntidadFiscalUsuario', $usrpermisos->ClaveEFUsuario)->delete();
+        //Se decodifican la lista de permisos para poder guardarlos
+        $lista = json_decode($usrpermisos->ListaPermisos, true);
+        $guardados = 0;
+        foreach ($lista as $key => $fila) {
+            if($fila['Activo'] == true) {
+                $permisos = new PermisosSeccionesdeSubmodulos();
+                $permisos->claveEntidadFiscalEmpresa = $usrpermisos->ClaveEFEmpresa;
+                $permisos->claveEntidadFiscalUsuario = $usrpermisos->ClaveEFUsuario;
+                $permisos->claveSeccion = $fila['claveSeccion'];
+                $banSave = $permisos->save();
+                $guardados += $banSave ? 1 : 0;
+            }
+        }
+        if($guardados > 0)
+            return response()->json(['EstatusPermisos' => 'OK'], ApiStatus::OK);
         else
-            return response()->json(['cargarProcesos' => 'Sin datos'], ApiStatus::NO_CONTENT);
-    }*/
+            return response()->json(['EstatusPermisos' => 'NO'], ApiStatus::NO_CONTENT);
+    }
 }

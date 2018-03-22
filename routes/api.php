@@ -20,6 +20,8 @@ Route::group(['middleware' => 'auth:api'], function() {
 	Route::get('/buscarUsuario/{claveEF_Empresa}/{usuario}/{password}', 'UsuariosController@buscar');
 	Route::get('/permisosUsuario/{claveEF_Empresa}/{claveEF_Usuario}', 'UsuariosController@permisos');
 	Route::get('/cargarPermisos/{claveAplicacion}', 'UsuariosController@cargarPermisos');
+	Route::get('/obtenerListaUsuarios/{txtBusqueda}', 'UsuariosController@obtenerUsuarios');
+	Route::post('/guardarPermisos', 'UsuariosController@guardarPermisos');
 	//CLIENTES
 	Route::get('/buscarClientes/{claveEF_Empresa}/{txtBusqueda}', 'ClientesController@buscar');
 	//PRODUCTOS

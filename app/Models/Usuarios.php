@@ -78,28 +78,23 @@ class Usuarios extends Model
     	return $consulta;
     }
 
-    /*public static function obtenerProcesosAutorizados($claveEF_Usuario)
+    public static function obtenerListaUsuarios($txtBusqueda)
     {
     	$consulta = DB::connection('copico')->
     					select("
-    						SELECT u.claveProceso, u.claveSubmodulo, p.proceso, p.descripcionProceso
-							FROM usuariosprocesosautorizacion u
-							JOIN procesosconautorizacion p ON u.claveProceso=p.claveProceso
-							JOIN submodulos s ON u.claveSubmodulo=s.claveSubmodulo
-							WHERE s.claveAplicacion = 100000005 AND u.claveEntidadFiscalUsuario = $claveEF_Usuario
+    						SELECT 
+								u.claveEntidadFiscalUsuario
+								, u.nickname
+								, e.razonSocial
+							FROM usuarios u
+							JOIN entidadesfiscales e ON u.claveEntidadFiscalUsuario=e.claveEntidadFiscal
+							WHERE u.activado = 1 AND (u.nickname LIKE '%$txtBusqueda%' OR e.razonSocial LIKE '%$txtBusqueda%')
     						");
     	return $consulta;
     }
 
-    public static function cargarProcesosAutorizados($claveAplicacion)
+    public function guardarPermisos($claveEntidadFiscal, $claveEF_Usuario, $listaPermisos)
     {
-    	$consulta = DB::connection('copico')->
-    					select("
-    						SELECT p.claveProceso, p.proceso, p.descripcionProceso
-							FROM procesosconautorizacion p
-							JOIN submodulos s ON p.claveSubmodulo=s.claveSubmodulo
-							WHERE s.claveAplicacion = $claveAplicacion
-    						");
-    	return $consulta;
-    }*/
+    	
+    }
 }
