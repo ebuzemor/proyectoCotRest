@@ -9,4 +9,8 @@ class Comprobantes extends Model
     protected $connection = 'copico';
 
     protected $table = 'comprobantes';
+
+    protected $primaryKey = 'claveComprobante';
+
+    public $timestamps = false;
 }

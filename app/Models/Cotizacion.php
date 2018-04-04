@@ -460,10 +460,10 @@ class Cotizacion extends Model
 
         /* DIAS DE ENTREGA */
         $diasDeEntrega=DB::connection('copico')
-        ->select("select IFNULL(max(dcde.diasDeEntrega),0) as diasDeEntrega from detallesdecomprobantes as dc
-        left join detallesdecomprobantes_diasdeentrega as dcde
-        on dc.claveDetalleDeComprobante= dcde.claveDetalleDeComprobante
-        where claveComprobante=$clave->claveComprobante");
+                           ->select("SELECT IFNULL(MAX(dcde.diasDeEntrega),0) AS diasDeEntrega
+                                     FROM detallesdecomprobantes AS dc
+                                     LEFT JOIN detallesdecomprobantes_diasdeentrega AS dcde ON dc.claveDetalleDeComprobante= dcde.claveDetalleDeComprobante
+                                     WHERE claveComprobante = $clave->claveComprobante");
 
         if($diasDeEntrega[0]->diasDeEntrega == 0)
         {

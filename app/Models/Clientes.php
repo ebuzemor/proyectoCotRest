@@ -64,4 +64,167 @@ class Clientes extends Model
                                   GROUP BY c.claveEntidadFiscalCliente, tc.nombre, cc.claveClasificador, cv.claveEntidadFiscalVendedor, cco.claveEntidadFiscalCobrador");
         return $consulta;
     }
+
+    public static function guardarCliente($empresa, $equipo, $usuario, $claveInmueble, $razonsocial, $rfc, $correoElectronico, $personaFisica, $claveEF_Empresa, 
+                                          $calle, $numeroExterior, $numeroInterior, $colonia, $localidad, $municipio, $claveEstado, $clavePais, $codigoPostal,
+                                          $claveTipoDeCliente, $esEspecial, $claveEntidadFiscalVendedor, $claveClasificador, $listaDeContactos, $listaDeTelefonos) {
+        $error = null;
+        DB::beginTransaction();
+        try {
+            $tipoOperacion = 'A';
+
+            //SI ES UN CLIENTE NUEVO, DAMOS DE ALTA SU ENTIDAD FISCAL Y/O FOLIOS
+            /* ---------------GENERAMOS FOLIOS----------------- */
+            $sql="CALL copicoods.folios_entidadesFiscales_A(?,?,?,?,@_claveEntidadFiscalCliente)";
+            DB::select($sql,array($usuario,$equipo,$empresa,$claveInmueble));
+            $claveEF_Cliente = DB::select('SELECT @_claveEntidadFiscalCliente as claveEntidadFiscalCliente');     
+
+            $sql="CALL copicoods.foliosDeDireccionesFiscales_A(?,@_claveDireccionFiscal)";
+            DB::select($sql,array($claveInmueble));
+
+            $sql="CALL copicoods.foliosDeCodigosDeClientes_A(?,@_codigoDeCliente)";
+            DB::select($sql,array($claveInmueble));
+
+            /* GUARDAR EN ENTIDADESFISCALES  */
+            $sql="CALL copicoods.entidadesFiscales_AC(?,?,?,@_claveEntidadFiscalCliente,?,?,?,?,@_result)";
+            DB::select($sql,array($empresa,$equipo,$usuario,$razonsocial,$rfc,$correoElectronico,$personaFisica));
+
+            // GUARDAR EN SINCRONIZADOR
+            $sql="CALL sincronizador.entidadesFiscalesClientes_A(?,@_claveEntidadFiscalCliente,?,@_result)";
+            DB::select($sql,array($claveEF_Empresa,$tipoOperacion));
+
+            $sql="CALL copicoods.direccionesFiscales_AC(?,?,?,@_claveDireccionFiscal,?,?,?,?,?,?,?,?,?,@_claveEntidadFiscalCliente,@_result)";
+            DB::select($sql,array(
+                $empresa,
+                $equipo,
+                $usuario,
+                $calle,
+                $numeroExterior,
+                $numeroInterior,
+                $colonia,
+                $localidad,
+                $municipio,
+                $claveEstado,
+                $clavePais,
+                $codigoPostal                                            
+            ));
+             // GUARDAR EN SINCRONIZADOR
+            $sql="CALL sincronizador.direccionesFiscalesClientes_A(?,@_claveDireccionFiscal,?,@_result)";
+            DB::select($sql,array($claveEF_Empresa,$tipoOperacion));
+
+            $sql="CALL copicoods.clientes_AC(?,?,?,@_claveEntidadFiscalCliente,?,@_codigoDeCliente,?,?,@_result)";
+            DB::select($sql,array(
+                $empresa,
+                $equipo,
+                $usuario,
+                $claveEF_Empresa,
+                $claveTipoDeCliente,
+                $esEspecial
+            ));
+             // GUARDAR EN SINCRONIZADOR
+            $sql="CALL sincronizador.clientes_A(@_claveEntidadFiscalCliente,?,?,@_result)";
+            DB::select($sql,array($claveEF_Empresa,$tipoOperacion));
+
+            /* CLIENTES_VENDEDORES  */
+            // OPCIONAL            
+            $sql="CALL copicoods.clientes_vendedores_A(?,?,?,@_claveEntidadFiscalCliente,?,@_result)";
+            DB::select($sql,array(
+                $empresa,
+                $equipo,
+                $usuario,
+                $claveEntidadFiscalVendedor
+            ));
+
+            // SINCRONIZADOR CLIENTES_vENDEDORES
+            // OPCIONAL
+            $sql="CALL sincronizador.clientes_vendedores_A(?,@_claveEntidadFiscalCliente,?,?,@_result)";
+            DB::select($sql,array($claveEF_Empresa,$claveEntidadFiscalVendedor,$tipoOperacion));
+
+            /* CLIENTES CLASIFICADORES DE CLIENTES */
+            $sql="CALL copicoods.clientes_clasificadoresDeClientes_A(?,?,?,@_claveEntidadFiscalCliente,?,@_result)";
+            DB::select($sql,array(
+                $empresa,
+                $equipo,
+                $usuario,
+                $claveClasificador
+            ));
+
+            // SINCRONIZADOR CLASIFICADORES DE CLIENTES
+            $sql="CALL sincronizador.clientes_clasificadoresDeClientes_A(?,@_claveEntidadFiscalCliente,?,?,@_result)";
+            DB::select($sql,array($claveEF_Empresa,$claveClasificador,$tipoOperacion));
+
+            /*  LISTA DE CONTACTOS */
+            $array= json_decode($listaDeContactos,true);      
+            foreach( $array as $i => $row)
+            {
+                // GENERAMOS LOS FOLIOS DE CONTACTO
+                $sql="CALL copicoods.foliosDeContactos_A(@_claveEntidadFiscalCliente,?,@_folioContacto)";
+                DB::select($sql,array($claveInmueble));
+                //$tipoMovimiento="A";                    
+
+                $sql="CALL copicoods.contactos_AC(?,?,?,@_claveEntidadFiscalCliente,@_folioContacto,?,?,@_result)";
+                DB::select($sql,array(
+                    $empresa,
+                    $equipo,
+                    $usuario,                    
+                    $row['nombre'],
+                    $row['observaciones']
+                ));
+
+                $sql="CALL sincronizador.contactos_A(?,@_claveEntidadFiscalCliente,@_folioContacto,?,@_result)";
+                DB::select($sql,array($claveEF_Empresa,$tipoOperacion));                                
+            }            
+
+            /* LISTA DE TELEFONOS */
+            $array= json_decode($listaDeTelefonos,true);      
+            foreach( $array as $i => $row)
+            {                
+                $sql="CALL copicoods.foliosDeTelefonos_A(@_claveEntidadFiscalCliente,?,@_folioTelefono)";
+                DB::select($sql,array($claveInmueble));
+                //$tipoMovimiento="A";                
+
+                $sql="CALL copicoods.telefonos_AC(?,?,?,@_claveEntidadFiscalCliente,@_folioTelefono,?,?,?,?,?,@_result)";
+                DB::select($sql,array(
+                    $empresa,
+                    $equipo,
+                    $usuario,
+                    $row['codigoDePais'],
+                    $row['codigoDeZona'],
+                    $row['numero'],
+                    $row['extension'],
+                    $row['esCelular']
+                ));
+
+                $sql="CALL sincronizador.telefonos_A(?,@_claveEntidadFiscalCliente,@_folioTelefono,?,@_result)";
+                DB::select($sql,array($claveEF_Empresa,$tipoOperacion));
+            }
+
+            DB::commit();
+            $success = true;
+        }catch(\Exception $e){
+            $success = false;
+            $error = false; //$e->getMessage();
+            DB::rollback();
+        }
+
+        if ($success){
+            //success
+            return $claveEF_Cliente;
+        }
+        else{
+            return $error;
+            //error  -testing-            
+        }        
+    }
+
+    public static function verificarClienteEmail($correoElectronico) {
+        $consulta = DB::connection('copico')
+                        ->select("
+                            SELECT c.claveEntidadFiscalCliente FROM clientes AS c
+                               LEFT JOIN entidadesfiscales AS ef
+                               ON c.claveEntidadFiscalCliente=ef.claveEntidadFiscal
+                            WHERE c.claveEntidadFiscalEmpresa=100000205 AND ef.correoElectronico='$correoElectronico'
+                        ");
+        return $consulta;
+    }
 }

@@ -92,9 +92,4 @@ class Usuarios extends Model
     						");
     	return $consulta;
     }
-
-    public function guardarPermisos($claveEntidadFiscal, $claveEF_Usuario, $listaPermisos)
-    {
-    	
-    }
 }
