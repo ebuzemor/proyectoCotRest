@@ -410,7 +410,7 @@ class Cotizacion extends Model
                         FROM detallesdecomprobantes d
                         JOIN bienes b ON d.claveProducto = b.claveProducto
                         JOIN catalogodeproductos p ON d.claveProducto = p.claveProducto
-                        JOIN impuestos_catalogodeproductos i ON p.claveProducto = i.claveProducto
+                        
                         JOIN codigosdeproductos c ON p.claveProducto = c.claveProducto AND c.claveTipoDeCodigoDeProducto = 1
                         LEFT JOIN detallesdecomprobantes_diasdeentrega e ON d.claveDetalleDeComprobante = e.claveDetalleDeComprobante
                         JOIN (
@@ -432,7 +432,7 @@ class Cotizacion extends Model
         $sql = "SELECT c.codigoDeComprobante, DATE(c.fechaEmision) AS fechaEmision, ctz.fechaVigencia, cliente.codigoDeCliente, 
                 ctz.subtotal, ctz.descuento, ctz.impuesto, ctz.total, ctz.observaciones, c.partidas, 
                 CONCAT(df.calle,' #', df.numeroExterior, ', Col. ', df.colonia, ', ', df.localidad, ', ', ' ', e.nombre, ', C.P. ', df.codigoPostal) as direccion,
-                CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, ci.importe AS total_impuestos
+                CONCAT('TEL: (', tel.codigoDeZona,') ', tel.numero) AS telefono, ef.razonSocial AS cliente, SUM(ci.importe) AS total_impuestos
                 FROM cotizaciones AS ctz
                 LEFT JOIN comprobantes AS c ON ctz.claveComprobanteDeCotizacion = c.claveComprobante
                 LEFT JOIN clientes AS cliente ON cliente.claveEntidadFiscalCliente = ctz.claveEntidadFiscalCliente
@@ -443,19 +443,21 @@ class Cotizacion extends Model
                 LEFT JOIN estados AS e ON df.claveEstado = e.claveEstado
                 LEFT JOIN telefonos AS tel ON tel.claveEntidadFiscal = $claveEF_Empresa
                 LEFT JOIN comprobantes_impuestos AS ci ON ci.claveComprobante = c.claveComprobante
-                WHERE c.codigoDeComprobante = ?";
+                WHERE c.codigoDeComprobante = ?
+                GROUP BY ci.claveComprobante";
         $comprobantes = DB::connection('copico')->select($sql, array($codigoComprobante));
 
         $clave = Comprobantes::where('codigoDeComprobante', $codigoComprobante)->first();
 
         $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad, um.descripcion AS UnidadMedida, 
-                dc.precioUnitario, dc.importe, dc.importeDescuento, dci.claveImpuesto, dci.importe AS impuestos
+                dc.precioUnitario, dc.importe, dc.importeDescuento, GROUP_CONCAT(dci.claveImpuesto) AS clavesImpuesto, SUM(dci.importe) AS impuestos
                 FROM detallesdecomprobantes AS dc
                 LEFT JOIN catalogodeproductos AS cp ON cp.claveProducto = dc.claveProducto
                 LEFT JOIN codigosdeproductos AS cdp ON cdp.claveProducto = dc.claveProducto AND cdp.claveTipoDeCodigoDeProducto = 1
                 LEFT JOIN unidadesdemedida AS um ON dc.claveUnidadDeMedida = um.claveUnidadDeMedida
                 LEFT JOIN detallesdecomprobantes_impuestos AS dci ON dci.claveDetalleDeComprobante = dc.claveDetalleDeComprobante
-                WHERE dc.claveComprobante = ?";
+                WHERE dc.claveComprobante = ?
+                GROUP BY dci.claveDetalleDeComprobante";
         $detallesComprobantes =  DB::connection('copico')->select($sql, array($clave->claveComprobante));
 
         /* DIAS DE ENTREGA */

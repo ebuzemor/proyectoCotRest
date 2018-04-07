@@ -187,6 +187,7 @@ class Productos extends Model
 		$consulta = DB::connection('copico')->
 					select("
 						SELECT c.codigodeproducto AS sku
+						, c.claveProducto
 						, CAST(COALESCE(SUM(m.cantidad)/(SELECT COUNT(*) FROM listasdeprecios), 0) AS DECIMAL(64,2)) AS qty
 						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 1 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS price
 						, MAX(COALESCE(CASE WHEN l.claveListaDePrecios = 2 THEN CAST(p.precioUnitario AS DECIMAL(64,2)) END, 0)) AS 'group_price:Lista 2'
