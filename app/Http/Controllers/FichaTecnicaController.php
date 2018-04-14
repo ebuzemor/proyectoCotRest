@@ -11,6 +11,9 @@ class FichaTecnicaController extends Controller
     public function obtenerFichaTecnica($claveProducto)
     {
     	$fichaTecnica = FichaTecnica::buscarFichaTecnica($claveProducto);
-    	return response()->json(['fichaTecnica' => $fichaTecnica], ApiStatus::OK);
+    	if($fichaTecnica != null)
+    		return response()->json(['fichaTecnica' => $fichaTecnica], ApiStatus::OK);
+    	else
+    		return response()->json(['fichaTecnica' => 'Sin datos'], ApiStatus::NO_CONTENT);
     }
 }

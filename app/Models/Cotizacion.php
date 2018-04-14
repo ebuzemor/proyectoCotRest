@@ -427,7 +427,7 @@ class Cotizacion extends Model
         return $consulta;
     }
 
-    public static function descargarPDF($claveEF_Empresa, $codigoComprobante)
+    public static function descargarPDF($claveEF_Empresa, $codigoComprobante, $fichaTecnica)
     {        
         $sql = "SELECT c.codigoDeComprobante, DATE(c.fechaEmision) AS fechaEmision, ctz.fechaVigencia, cliente.codigoDeCliente, 
                 ctz.subtotal, ctz.descuento, ctz.impuesto, ctz.total, ctz.observaciones, c.partidas, 
@@ -449,13 +449,18 @@ class Cotizacion extends Model
 
         $clave = Comprobantes::where('codigoDeComprobante', $codigoComprobante)->first();
 
-        $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad, um.descripcion AS UnidadMedida, 
-                dc.precioUnitario, dc.importe, dc.importeDescuento, GROUP_CONCAT(dci.claveImpuesto) AS clavesImpuesto, SUM(dci.importe) AS impuestos
+        $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad,dde.diasDeEntrega,um.descripcion AS UnidadMedida,
+                dc.precioUnitario, dc.importe, dc.importeDescuento,GROUP_CONCAT(dci.claveImpuesto) AS claveImpuesto, SUM(dci.importe) AS impuestos,
+                ft.resumen AS detalles, i.nombreImagen, i.extension, i.contenido
                 FROM detallesdecomprobantes AS dc
                 LEFT JOIN catalogodeproductos AS cp ON cp.claveProducto = dc.claveProducto
                 LEFT JOIN codigosdeproductos AS cdp ON cdp.claveProducto = dc.claveProducto AND cdp.claveTipoDeCodigoDeProducto = 1
                 LEFT JOIN unidadesdemedida AS um ON dc.claveUnidadDeMedida = um.claveUnidadDeMedida
                 LEFT JOIN detallesdecomprobantes_impuestos AS dci ON dci.claveDetalleDeComprobante = dc.claveDetalleDeComprobante
+                LEFT JOIN detallesdecomprobantes_diasdeentrega AS dde ON dde.claveDetalleDeComprobante = dc.claveDetalleDeComprobante
+                LEFT JOIN fichatecnica AS ft ON ft.claveProducto = dc.claveProducto
+                LEFT JOIN catalogodeproductos_imagenes AS cpi ON cpi.claveProducto = ft.claveProducto
+                LEFT JOIN imagenes AS i on i.claveImagen = cpi.claveImagen
                 WHERE dc.claveComprobante = ?
                 GROUP BY dci.claveDetalleDeComprobante";
         $detallesComprobantes =  DB::connection('copico')->select($sql, array($clave->claveComprobante));
@@ -464,7 +469,7 @@ class Cotizacion extends Model
         $diasDeEntrega=DB::connection('copico')
                            ->select("SELECT IFNULL(MAX(dcde.diasDeEntrega),0) AS diasDeEntrega
                                      FROM detallesdecomprobantes AS dc
-                                     LEFT JOIN detallesdecomprobantes_diasdeentrega AS dcde ON dc.claveDetalleDeComprobante= dcde.claveDetalleDeComprobante
+                                     LEFT JOIN detallesdecomprobantes_diasdeentrega AS dcde ON dc.claveDetalleDeComprobante = dcde.claveDetalleDeComprobante
                                      WHERE claveComprobante = $clave->claveComprobante");
 
         if($diasDeEntrega[0]->diasDeEntrega == 0)
@@ -475,16 +480,24 @@ class Cotizacion extends Model
         {
             //SE SUMAN LOS DIAS DE ENTREGA          
             $mod_date = strtotime($comprobantes[0]->fechaEmision."+ ".$diasDeEntrega[0]->diasDeEntrega."days");
-            $fechaEntrega = date('Y-m-d',$mod_date);  
+            $fechaEntrega = date('Y-m-d', $mod_date);
         }
                                              
         /* CONDICIONES COMERCIALES */
         $condComCTZ = CondicionesComercialesCtz::where('claveEntidadFiscalEmpresa', $claveEF_Empresa)->first();        
         $condComercial = explode("\n", $condComCTZ->condicionComercial);
-
         /* GENERA EL PDF */
         $observaciones = explode("\n",$comprobantes[0]->observaciones);
-        $pdf = PDF::loadView('pdfView', compact('detallesComprobantes', 'comprobantes', 'condComercial','fechaEntrega','observaciones'));
+
+        /* FICHA TECNICA */
+        if($fichaTecnica == 1) {
+            $pdf = PDF::loadView('pdfFichaTecnica', compact('detallesComprobantes', 'comprobantes', 'condComercial', 'fechaEntrega', 'observaciones'))
+                   ->setPaper('a4', 'landscape');
+        }
+        else {
+            $pdf = PDF::loadView('pdfView', compact('detallesComprobantes', 'comprobantes', 'condComercial', 'fechaEntrega', 'observaciones'))->setPaper('a4', 'landscape');
+        }
+        
         return $pdf;
     }
 }

@@ -17,4 +17,4 @@
 
 //Route::get('/buscarUsuario/{claveEF_Empresa}/{usuario}/{password}', 'UsuariosController@buscar');
 //Route::post('/login', 'UsuariosController@login');
-Route::post('/prueba', 'UsuariosController@guardarPermisos');
+Route::get('/prueba', 'pruebaController@imagenes');
