@@ -220,7 +220,12 @@ class Cotizacion extends Model
                 }
             }                               
             //BORRAR DETALLES DE COMPROBANTES
-            $array=json_decode($detallesComprobantes,true);
+            $consulta = DB::select("SELECT * 
+                                    FROM copicoods.detallesdecomprobantes d 
+                                    JOIN copicoods.detallesdecomprobantes_diasdeentrega e 
+                                    USING (claveDetalleDeComprobante)
+                                    WHERE d.claveComprobante = ?", [$ClaveComprobante]);
+            $array = json_decode(json_encode($consulta), true);
             foreach($array as $i => $row)
             {
                 if($row['claveDetalleDeComprobante'])
@@ -231,92 +236,84 @@ class Cotizacion extends Model
                         $equipo,
                         $usuario,
                         $row['claveDetalleDeComprobante'],//AGREGAR CAMPO
-                        $row['NumeroPartidas'],
-                        $row['ClaveProducto'],
-                        $row['Cantidad'],
-                        $row['ClaveUnidadDeMedida'],
-                        $row['PrecioUnitario'],
-                        $row['Importe'],
-                        $row['ImporteDescuento'],
+                        $row['numeroDePartida'],
+                        $row['claveProducto'],
+                        $row['cantidad'],
+                        $row['claveUnidadDeMedida'],
+                        $row['precioUnitario'],
+                        $row['importe'],
+                        $row['importeDescuento'],
                         $ClaveComprobante
                     ));
-                    /* BORRA DIAS DE ENTREGA POR PARTIDA */
+                    // BORRA DIAS DE ENTREGA POR PARTIDA 
                     $sql="CALL copicoods.detallesdecomprobantes_diasdeentrega_B(?, ?, ?, ?, ?, @_result)";
                     DB::select($sql, [
                         $empresa,
                         $equipo,
                         $usuario,
                         $row['claveDetalleDeComprobante'],
-                        $row['DiasDeEntrega']
+                        $row['diasDeEntrega']
                     ]);
-                    /* DETALLES DE COMPROBANTES_IMPUESTOS */
-                    $array2=json_decode($row['Impuestos'], true);
-                    foreach($array2 as $i2 => $v)
-                    {                            
-                        $sql="CALL copicoods.detallesdecomprobantes_impuestos_B(?, ?, ?, ?, ?, ?, @_result)";
+                    // DETALLES DE COMPROBANTES_IMPUESTOS 
+                    $sql="CALL copicoods.detallesdecomprobantes_impuestos_B(?, ?, ?, ?, ?, ?, @_result)";
                         DB::select($sql, array(
                             $empresa,
                             $equipo,
                             $usuario,
                             $row['claveDetalleDeComprobante'],//AGREGAR CAMPO
-                            $v['ClaveImpuesto'],
-                            $v['Importe']
-                        ));
-                    }
+                            1,
+                            ($row['importe'] - $row['importeDescuento']) * 1.16
+                    ));
                 }
             }
-            /* ACTUALIZAR DETALLES DE COMPROBANTES */ //IF($status==2)  nueva partida
             $array = json_decode($detallesComprobantes, true);
             foreach($array as $i => $row)
-            {
-                if($row['Estatus'] == 2 || $row['Estatus'] == 1 || $row['Estatus'] == 3)
-                {                       
-                    /*GENERAR FOLIO DETALLES DE COMPROBANTES */
-                    $sql = "CALL copicoods.foliosDetallesDeComprobantes_A(?, ?, ?, ?, @_claveDetalleDeComprobante)";
-                    DB::select($sql, array($empresa, $equipo, $usuario, $empresa));  
-                    $sql="CALL copicoods.detallesDeComprobantes_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, ?, ?, ?, ?, ?, ?, ?, @_result)";
+            {                
+                //GENERAR FOLIO DETALLES DE COMPROBANTES
+                $sql = "CALL copicoods.foliosDetallesDeComprobantes_A(?, ?, ?, ?, @_claveDetalleDeComprobante)";
+                DB::select($sql, array($empresa, $equipo, $usuario, $empresa));  
+                $sql="CALL copicoods.detallesDeComprobantes_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, ?, ?, ?, ?, ?, ?, ?, @_result)";
+                DB::select($sql, array(
+                    $empresa,
+                    $equipo,
+                    $usuario,                            
+                    $row['NumeroPartidas'],
+                    $row['ClaveProducto'],
+                    $row['Cantidad'],
+                    $row['ClaveUnidadDeMedida'],
+                    $row['PrecioUnitario'],
+                    $row['Importe'],
+                    $row['ImporteDescuento'],
+                    $ClaveComprobante
+                ));
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR
+                if($claveTipoEstatusRecepcion == 162) {
+                    $sql="CALL sincronizador.detallesdecomprobantes(@_claveDetalleDeComprobante, ?, ?, @_result)";
+                    DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
+                }
+                // DETALLESDECOMPROBANTES_DIASDEENTREGA
+                $sql="CALL copicoods.detallesdecomprobantes_diasdeentrega_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, @_result)";
+                DB::select($sql, array($empresa, $equipo, $usuario, $row['DiasDeEntrega']));
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR
+                if($claveTipoEstatusRecepcion == 162){                               
+                    $sql="CALL sincronizador.detallesdecomprobantes_diasdeentrega(@_claveDetalleDeComprobante, ?, ?, @_result)";
+                    DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
+                }
+                // ACTUALIZAR DETALLES COMPROBANTES IMPUESTOS 
+                $array2 = json_decode($row['Impuestos'], true);
+                foreach($array2 as $i2 => $v) {
+                    $sql = "CALL copicoods.detallesdecomprobantes_impuestos_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, ?, @_result)";
                     DB::select($sql, array(
                         $empresa,
                         $equipo,
-                        $usuario,                            
-                        $row['NumeroPartidas'],
-                        $row['ClaveProducto'],
-                        $row['Cantidad'],
-                        $row['ClaveUnidadDeMedida'],
-                        $row['PrecioUnitario'],
-                        $row['Importe'],
-                        $row['ImporteDescuento'],
-                        $ClaveComprobante
+                        $usuario,                                
+                        $v['ClaveImpuesto'],
+                        $v['Importe']
                     ));
-                    /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
-                    if($claveTipoEstatusRecepcion == 162) {
-                        $sql="CALL sincronizador.detallesdecomprobantes(@_claveDetalleDeComprobante, ?, ?, @_result)";
-                        DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
-                    }
-                    /* DETALLESDECOMPROBANTES_DIASDEENTREGA */
-                    $sql="CALL copicoods.detallesdecomprobantes_diasdeentrega_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, @_result)";
-                    DB::select($sql, array($empresa, $equipo, $usuario, $row['DiasDeEntrega']));
-                    /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
-                    if($claveTipoEstatusRecepcion == 162){                               
-                        $sql="CALL sincronizador.detallesdecomprobantes_diasdeentrega(@_claveDetalleDeComprobante, ?, ?, @_result)";
-                        DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
-                    }
-                    /* ACTUALIZAR DETALLES COMPROBANTES IMPUESTOS */
-                    $array2 = json_decode($row['Impuestos'], true);
-                    foreach($array2 as $i2 => $v) {
-                        $sql = "CALL copicoods.detallesdecomprobantes_impuestos_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, ?, @_result)";
-                        DB::select($sql, array(
-                            $empresa,
-                            $equipo,
-                            $usuario,                                
-                            $v['ClaveImpuesto'],
-                            $v['Importe']
-                        ));
-                        /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
-                        if($claveTipoEstatusRecepcion == 162){                                            
-                            $sql="CALL sincronizador.detallesdecomprobantes_impuestos(@_claveDetalleDeComprobante, ?, ?, ?, @_result)";
-                            DB::select($sql, array($v['ClaveImpuesto'], $claveEntidadFiscalInmueble, $tipoOperacion));
-                        }
+                    // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR
+                    if($claveTipoEstatusRecepcion == 162){                                            
+                        $sql="CALL sincronizador.detallesdecomprobantes_impuestos(@_claveDetalleDeComprobante, ?, ?, ?, @_result)";
+                        DB::select($sql, array($v['ClaveImpuesto'], $claveEntidadFiscalInmueble, $tipoOperacion));
                     }
                 }
             }

@@ -63,14 +63,14 @@
         </table>  
                  
         <div class="row">
-            <div class="col-md-4 offset-md-8">     
+            <div class="col-md-12">     
                 <div class="totales">                  
-                    <table class="table table-sm table-bordered table-condensed">                           
+                    <table class="table table-sm table-condensed">                           
                         @foreach($comprobantes as $row)                                        
-                        <tr><th class="table-secondary">SUBTOTAL: </th><td class="text-right">$ {{number_format($row->subtotal, 2)}}</td></tr>
-                        <tr><th class="table-secondary">DESCUENTO: </th><td class="text-right">$ {{number_format($row->descuento, 2)}}</td></tr>                        
-                        <tr><th class="table-secondary">IVA: </th><td class="text-right">$ {{number_format($row->total_impuestos, 2)}}</td></tr>
-                        <tr><th class="table-secondary">TOTAL: </th><td class="text-right">$ {{number_format($row->total, 2)}}</td></tr>                                                                                                                    
+                        <tr><td style="width:600px;border:1px white;"></td><th class="table-secondary text-right">SUBTOTAL: </th><td style="border:1px solid #DEE2E6;" class="text-right">$ {{number_format($row->subtotal, 2)}}</td></tr>
+                        <tr><td style="width:600px;border:1px white;"></td><th class="table-secondary text-right">DESCUENTO: </th><td style="border:1px solid #DEE2E6;" class="text-right">$ {{number_format($row->descuento, 2)}}</td></tr>                        
+                        <tr><td  style="width:600px;border:1px white;"></td><th class="table-secondary text-right">IVA: </th><td style="border:1px solid #DEE2E6;" class="text-right">$ {{number_format($row->total_impuestos, 2)}}</td></tr>
+                        <tr><td  style="width:600px;border:1px white;"></td><th class="table-secondary text-right">TOTAL: </th><td style="border:1px solid #DEE2E6;" class="text-right">$ {{number_format($row->total, 2)}}</td></tr>                                                                                                                            
                         @endforeach
                     </table>   
                 </div>

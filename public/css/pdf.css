@@ -53,12 +53,10 @@ p{
     height:65px;
     width:auto;
 }
-.totales{    
-    width:350px;    
-    padding-left: 650px;    
-}
-.totales table{    
-    border:1px solid #808B97;
+
+.totales td
+{     
+    border:1px white;    
 }
 .condComerciales p{
     margin-bottom:0rem;
