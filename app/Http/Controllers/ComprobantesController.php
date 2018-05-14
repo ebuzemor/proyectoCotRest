@@ -29,4 +29,13 @@ class ComprobantesController extends Controller
     	else
     		return response()->json(["respuesta" => "El pedido no se pudo cancelar"], ApiStatus::NO_CONTENT);
     }
+
+    public function InfoComprobante($claveComprobante)
+    {
+        $comprobante = Comprobantes::findOrFail($claveComprobante);//::where('claveComprobante', $claveComprobante)->firstOrFail();
+        if($comprobante != null)
+            return response()->json(["folioCodigoComprobante" => $comprobante->codigoDeComprobante], ApiStatus::OK);
+        else
+            return response()->json(["Error:" => " El comprobante con la clave solicitada no existe"], ApiStatus::NO_CONTENT);
+    }
 }

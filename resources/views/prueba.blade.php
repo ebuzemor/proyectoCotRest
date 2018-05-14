@@ -1,1 +1,1 @@
-{{dd($consulta)}}
+{{dd($arrayFT)}}

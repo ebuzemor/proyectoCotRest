@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cotización Aprosi</title>
+    <title>Cotización Aprosi</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/pdf.css">
+    <link rel="stylesheet" href="css/pdf.css">
 </head>
 <body>
 <div class="container-fluid">
     <div class="header">
-        <img src="img/logotiposDeEmpresas/logo_aprosi.png" class="img_aprosi" />
-        <img src="img/logotiposDeEmpresas/cpc.jpg" class="img_copico" />
+        <img src="img/logotiposDeEmpresas/logo_aprosi.png" class="img_aprosi"/>
+        <img src="img/logotiposDeEmpresas/cpc.jpg" class="img_copico"/>
          <h3><strong>APROSI EQUIPOS SA DE CV</strong></h3>
          @foreach($comprobantes as $row)
             <p style="font-size:10px"><b>{{utf8_decode($row->direccion)}}</b>  <b> {{$row->telefono}}</b></p>
@@ -28,7 +28,7 @@
                 <td colspan="2"><strong>CÓDIGO DE COTIZACIÓN: </strong></td><td colspan="2">{{$row->codigoDeComprobante}}</td>
             </tr>
             <tr>
-                <td colspan="2"  ><strong>CLIENTE: </strong></td><td colspan="2">{{$row->codigoDeCliente}} - {{$row->cliente}}</td>
+                <td colspan="2"><strong>CLIENTE: </strong></td><td colspan="2">{{$row->codigoDeCliente}} - {{utf8_decode($row->cliente)}}</td>
             </tr>
             <tr colspan="2">
                 <td><strong>FECHA DE VIGENCIA: </strong></td><td>{{$row->fechaVigencia}}</td>                
@@ -37,45 +37,60 @@
             @endforeach            
         </table>                      
     </div>
-    
-        <table class="table table-bordered table-condensed">   
-            <tr class="table-secondary">                
-                <th>IMAGEN</th>                
+        <table class="table table-bordered table-condensed">
+            <tr class="table-secondary">
+                <th>IMAGEN</th>
                 <th>CÓDIGO</th>
-                <th>DESCRIPCIÓN</th>                
+                <th>DESCRIPCIÓN</th>
                 <th>CANT</th>
-                <th>DIAS ENTREGA</th>   
+                <th>DIAS ENTREGA</th>
                 <th>P. UNIT.</th>
-                <th>DESCUENTO</th>                                
+                <th>DESCUENTO</th>
                 <th>SUBTOTAL</th>
-            </tr>           
-
-            @foreach($detallesComprobantes as $row)      
-            <tr>
-                <td class="text-center">                    
-                @php
-                    if($row->contenido)
-                    {
-                        echo '<img src="data:image/'.$row->extension.';base64,'.base64_encode($row->contenido).'" style="padding-top:10px" alt="" />';
-                    }                                                                                                                                                   
-                @endphp                                              
-                </td>                               
-                <td class="text-center">{{$row->codigoDeProducto}}</td>
-                <td class="text-center">{{$row->descripcion}}</td>
-                <td class="text-center" colspan="1" >{{$row->cantidad}}</td>
-                <td class="text-center" colspan="1" >{{$row->diasDeEntrega}}</td>
-                <td class="text-right" colspan="1" >${{number_format($row->precioUnitario, 2)}}</td>
-                <td class="text-right" colspan="1">${{number_format($row->importeDescuento, 2)}}</td>                                
-                <td class="text-right" colspan="1">${{number_format($row->cantidad*$row->precioUnitario-$row->importeDescuento, 2)}}</td>
-            </tr> 
-            <tr>
-                <td class="text-left text-dark" colspan="3">                    
-                    @if($row->detalles)                        
-                        <strong>DESCRIPCIÓN: </strong><em>{{$row->detalles}}</em>                                  
-                    @endif
-                </td>
-                <td colspan="5"></td>
             </tr>
+
+            @foreach($detallesComprobantes as $row)
+                @foreach($arrayFT as $i=> $ft)
+                @if($row->claveProducto == $ft['ClaveProducto'] && $ft['EnvioFicha']==1)
+                <tr>
+                    <td class="text-center">                    
+                    @php
+                        if($row->contenido)
+                        {
+                            echo '<img src="data:image/'.$row->extension.';base64,'.base64_encode($row->contenido).'" style="padding-top:10px" alt="" />';
+                        }                                                                                                                                                   
+                    @endphp                                              
+                    </td>                               
+                    <td class="text-center">{{$row->codigoDeProducto}}</td>
+                    <td class="text-center">{{$row->descripcion}}</td>
+                    <td class="text-center" colspan="1" >{{$row->cantidad}}</td>
+                    <td class="text-center" colspan="1" >{{$row->diasDeEntrega}}</td>
+                    <td class="text-right" colspan="1" >${{number_format($row->precioUnitario, 2)}}</td>
+                    <td class="text-right" colspan="1">${{number_format($row->importeDescuento, 2)}}</td>                                
+                    <td class="text-right" colspan="1">${{number_format($row->cantidad*$row->precioUnitario-$row->importeDescuento, 2)}}</td>
+                </tr> 
+                <tr>
+                    <td class="text-left text-dark" colspan="3">                    
+                        @if($row->detalles)                        
+                            <strong>DESCRIPCIÓN: </strong><em>{{$row->detalles}}</em>                                  
+                        @endif
+                    </td>
+                    <td colspan="5"></td>
+                </tr>
+                @endif
+                @if($row->claveProducto == $ft['ClaveProducto'] && $ft['EnvioFicha']==0)      
+                    <tr>
+                        <td class="text-center">.</td>
+                        <td class="text-center">{{$row->codigoDeProducto}}</td>
+                        <td class="text-center">{{$row->descripcion}}</td>
+                        <td class="text-center">{{$row->cantidad}}</td>
+                        <td class="text-center">{{$row->diasDeEntrega}}</td>
+                        <td class="text-right">${{number_format($row->precioUnitario, 2)}}</td>
+                        <td class="text-right">${{number_format($row->importeDescuento, 2)}}</td>                                
+                        <td class="text-right">${{number_format($row->cantidad*$row->precioUnitario-$row->importeDescuento, 2)}}</td>
+                    </tr>
+                @endif
+                @endforeach
             @endforeach
         </table>  
       

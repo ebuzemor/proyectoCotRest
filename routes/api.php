@@ -44,10 +44,17 @@ Route::group(['middleware' => 'auth:api'], function() {
 	Route::post('/guardarCotizacion','CotizacionController@guardarCotizacion');
 	Route::post('/editarCotizacion','CotizacionController@editarCotizacion');
 	Route::get('/cargarDetallesCotizacion/{claveComprobante}', 'CotizacionController@cargarDetallesCotizacion');
+	//COMPROBANTES
+	Route::get('/obtenerInfoCotizacion/{claveComprobante}', 'ComprobantesController@InfoComprobante');
+	//HISTORIAL DEL CLIENTE
+	Route::get('/obtenerCtzGeneradas/{claveEF_Inmueble}/{fechaInicio}/{fechaFinal}/{claveEF_Cliente}', 'HistorialClienteController@ListaCtzGeneradas');
+	Route::get('/obtenerCtzFacturadas/{claveEF_Inmueble}/{fechaInicio}/{fechaFinal}/{claveEF_Cliente}', 'HistorialClienteController@ListaCtzFacturadas');
+	Route::get('/obtenerListaProdCotizados/{claveEF_Inmueble}/{fechaInicio}/{fechaFinal}/{claveEF_Cliente}', 'HistorialClienteController@ListaProductosCotizados');
+	Route::get('/obtenerListaProdVendidos/{claveEF_Inmueble}/{fechaInicio}/{fechaFinal}/{claveEF_Cliente}', 'HistorialClienteController@ListaProductosVendidos');
 	//COTIZACIONES_MAIL
 	Route::post('/enviarMail','CotizacionController@enviarMail');
 	//COTIZACIONES_DESCARGAR_PDF
-	Route::get('/descargarPDF/{claveEF_Empresa}/{claveComprobante}/{fichaTecnica}','CotizacionController@descargarPDF');
+	Route::post('/descargarPDF','CotizacionController@descargarPDF');
 	//REPORTES
 	Route::post('/listaCotizacionesUsr', 'ReportesController@listaCotizaciones');
 	Route::post('/reporteCotizacionesUsr', 'ReportesController@reporteCotizaciones');

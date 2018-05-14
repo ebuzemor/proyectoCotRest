@@ -19,7 +19,7 @@ class Cotizacion extends Model
         DB::beginTransaction();       
         try {
             $tipoOperacion = 'A';
-            /* GENERA LOS CODIGOS(FOLIOS) COMPROBANTES */
+            // GENERA LOS CODIGOS(FOLIOS) COMPROBANTES 
             $sql = "CALL copicoods.foliosCodigosDeComprobantes_A(?, ?, ?, ?, ?, @_codigoDeComprobante)";
             DB::select($sql, array($empresa, $equipo, $usuario, $empresa, $claveTipoDeComprobante)); // retorna un array de objetos.                
             $claveComprobante = DB::select('SELECT @_codigoDeComprobante as folioCodigoComprobante');     
@@ -42,24 +42,24 @@ class Cotizacion extends Model
                 $claveEntidadFiscalResponsable            
             ));
 
-             /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+             // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
             if($claveTipoEstatusRecepcion == 162) {                
                 $sql = "CALL sincronizador.comprobantes(@_claveComprobante, ?, ?, @_result)";
                 DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));                
             }
-            /* IMPUESTOS */
+            // IMPUESTOS 
             $array = json_decode($comprobantesImpuestos, true);                   
             foreach($array as $i => $row) {
                 // $respuesta=$row['Importe'];                     
                 $sql = "CALL copicoods.comprobantes_impuestos_AC(?, ?, ?, @_claveComprobante, ?, ?, @_result)";
                 DB::select($sql, array($empresa, $equipo, $usuario, $row['ClaveImpuesto'], $row['Importe']));
-                /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
                 if($claveTipoEstatusRecepcion == 162) {
                     $sql = "CALL sincronizador.comprobantes_impuestos(@_claveComprobante, ?, ?, ?, @_result)";
                     DB::select($sql, array($row['ClaveImpuesto'], $claveEntidadFiscalInmueble, $tipoOperacion));
                 }
             }
-            /* COTIZACIONES */
+            // COTIZACIONES 
             $sql = "CALL copicoods.cotizaciones_AC(?, ?, ?, @_claveComprobante, ?, ?, ?, ?, ?, ?, ?, ?, @_result)";
             DB::select($sql, array(                
                 $empresa,
@@ -74,13 +74,13 @@ class Cotizacion extends Model
                 $Total,
                 $Observaciones
             ));
-            /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+            // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
             if($claveTipoEstatusRecepcion == 162) {
                 $sql = "CALL sincronizador.cotizaciones(@_claveComprobante, ?, ?, @_result)";
                 DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
             }
-            /* -------DETALLES DE COMPROBANTES---------- */
-            $array= json_decode($detallesComprobantes,true);                                   
+            // -------DETALLES DE COMPROBANTES---------- 
+            $array= json_decode($detallesComprobantes,true);
             foreach( $array as $i => $row)
             {
                 $sql = "CALL copicoods.foliosDetallesDeComprobantes_A(?, ?, ?, ?, @_claveDetalleDeComprobante)";
@@ -96,28 +96,28 @@ class Cotizacion extends Model
                     $row['ClaveUnidadDeMedida'],
                     $row['PrecioUnitario'],
                     $row['Importe'],
-                    $row['ImporteDescuento']                    
-                ));                    
-                 /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+                    $row['ImporteDescuento']
+                ));
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
                 if($claveTipoEstatusRecepcion == 162) {
                     $sql="CALL sincronizador.detallesdecomprobantes(@_claveDetalleDeComprobante, ?, ?, @_result)";
                     DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
                 }
-                /* DETALLES DE COMPROBANTES_DIASDEENTREGA */
+                // DETALLES DE COMPROBANTES_DIASDEENTREGA 
                 $sql = "CALL copicoods.detallesdecomprobantes_diasdeentrega_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, @_result)";
                 DB::select($sql, array($empresa, $equipo, $usuario, $row['DiasDeEntrega']));
-                /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
                 if($claveTipoEstatusRecepcion == 162) {
                     $sql = "CALL sincronizador.detallesdecomprobantes_diasdeentrega(@_claveDetalleDeComprobante, ?, ?, @_result)";
                     DB::select($sql, array($claveEntidadFiscalInmueble, $tipoOperacion));
                 }
-                /* DETALLES COMPROBANTES_IMPUESTOS  */
+                // DETALLES COMPROBANTES_IMPUESTOS
                 $array2 = json_decode($row["Impuestos"], true);
                 foreach($array2 as $i2 => $v)
                 {
                     $sql = "CALL copicoods.detallesdecomprobantes_impuestos_AC(?, ?, ?, @_claveDetalleDeComprobante, ?, ?, @_result)";
                     DB::select($sql, array($empresa, $equipo, $usuario, $v['ClaveImpuesto'], $v['Importe']));
-                    /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+                    // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
                     if($claveTipoEstatusRecepcion == 162) {                                            
                         $sql = "CALL sincronizador.detallesdecomprobantes_impuestos(@_claveDetalleDeComprobante, ?, ?, ?, @_result)";
                         DB::select($sql, array($v['ClaveImpuesto'], $claveEntidadFiscalInmueble, $tipoOperacion));
@@ -131,8 +131,8 @@ class Cotizacion extends Model
             $error = $e->getMessage();
             DB::rollback();
         }
-        if ($success) 
-            return $claveComprobante;        
+        if ($success)
+            return $claveComprobante;
         else
             return $error;
     }
@@ -160,12 +160,12 @@ class Cotizacion extends Model
                 $claveEntidadFiscalResponsable,
                 $codigoDeComprobante            
             ));
-            /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+            // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR
             if($claveTipoEstatusRecepcion == 162) {                
                 $sql = "CALL sincronizador.comprobantes(?, ?, ?, @_result)";
                 DB::select($sql, array($ClaveComprobante, $claveEntidadFiscalInmueble, $tipoOperacion));
             }
-            /* UPDATE COTIZACIONES */
+            // UPDATE COTIZACIONES
             $sql="CALL copicoods.cotizaciones_AC(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @_result)";
             DB::select($sql, array(
                 $empresa,
@@ -181,12 +181,12 @@ class Cotizacion extends Model
                 $Total,
                 $Observaciones
             ));
-             /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+            // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR
             if($claveTipoEstatusRecepcion == 162) {
                 $sql = "CALL sincronizador.cotizaciones(?, ?, ?, @_result)";
                 DB::select($sql, array($ClaveComprobante, $claveEntidadFiscalInmueble, $tipoOperacion));
             }
-            /* BORRAR COMPROBANTES_IMPUESTOS */ 
+            // BORRAR COMPROBANTES_IMPUESTOS
             $array = json_decode($comprobantesImpuestos, true);
             foreach($array as $i=> $row)
             {
@@ -200,7 +200,7 @@ class Cotizacion extends Model
                     $row['Importe']
                 ));
             }
-            /* ACTUALIZAR COMPROBANTES_IMPUESTOS */
+            // ACTUALIZAR COMPROBANTES_IMPUESTOS 
             $array = json_decode($comprobantesImpuestos, true);
             foreach($array as $i => $row)
             {
@@ -213,7 +213,7 @@ class Cotizacion extends Model
                     $row['ClaveImpuesto'],
                     $row['Importe']
                 ));
-                /* SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR */
+                // SI LA COTIZACION ES EN DEFINITIVA SE PROCEDE A GUARDAR EN SINCRONIZADOR 
                 if($claveTipoEstatusRecepcion == 162){                                            
                     $sql = "CALL sincronizador.comprobantes_impuestos(?, ?, ?, ?, @_result)";
                     DB::select($sql, array($ClaveComprobante, $row['ClaveImpuesto'], $claveEntidadFiscalInmueble, $tipoOperacion));
@@ -391,7 +391,7 @@ class Cotizacion extends Model
                         SELECT 
                             d.claveDetalleDeComprobante
                             , d.claveProducto
-                            , p.descripcion
+                            , TRIM(Replace(Replace(Replace(p.descripcion,'\t',''),'\n',''),'\r','')) AS descripcion
                             , b.esImportado
                             , x.sumaimpuestos
                             , x.tasas
@@ -424,7 +424,7 @@ class Cotizacion extends Model
         return $consulta;
     }
 
-    public static function descargarPDF($claveEF_Empresa, $codigoComprobante, $fichaTecnica)
+    public static function descargarPDF($claveEF_Empresa, $codigoComprobante, $arrayFichaTecnica)
     {        
         $sql = "SELECT c.codigoDeComprobante, DATE(c.fechaEmision) AS fechaEmision, ctz.fechaVigencia, cliente.codigoDeCliente, 
                 ctz.subtotal, ctz.descuento, ctz.impuesto, ctz.total, ctz.observaciones, c.partidas, 
@@ -446,7 +446,7 @@ class Cotizacion extends Model
 
         $clave = Comprobantes::where('codigoDeComprobante', $codigoComprobante)->first();
 
-        $sql = "SELECT dc.numeroDePartida, cdp.codigoDeProducto, cp.descripcion, dc.cantidad,dde.diasDeEntrega,um.descripcion AS UnidadMedida,
+        $sql = "SELECT dc.numeroDePartida, cp.claveProducto, cdp.codigoDeProducto, cp.descripcion, dc.cantidad,dde.diasDeEntrega,um.descripcion AS UnidadMedida,
                 dc.precioUnitario, dc.importe, dc.importeDescuento,GROUP_CONCAT(dci.claveImpuesto) AS claveImpuesto, SUM(dci.importe) AS impuestos,
                 ft.resumen AS detalles, i.nombreImagen, i.extension, i.contenido
                 FROM detallesdecomprobantes AS dc
@@ -462,7 +462,7 @@ class Cotizacion extends Model
                 GROUP BY dci.claveDetalleDeComprobante";
         $detallesComprobantes =  DB::connection('copico')->select($sql, array($clave->claveComprobante));
 
-        /* DIAS DE ENTREGA */
+        // DIAS DE ENTREGA
         $diasDeEntrega=DB::connection('copico')
                            ->select("SELECT IFNULL(MAX(dcde.diasDeEntrega),0) AS diasDeEntrega
                                      FROM detallesdecomprobantes AS dc
@@ -480,15 +480,26 @@ class Cotizacion extends Model
             $fechaEntrega = date('Y-m-d', $mod_date);
         }
                                              
-        /* CONDICIONES COMERCIALES */
+        // CONDICIONES COMERCIALES 
         $condComCTZ = CondicionesComercialesCtz::where('claveEntidadFiscalEmpresa', $claveEF_Empresa)->first();        
         $condComercial = explode("\n", $condComCTZ->condicionComercial);
-        /* GENERA EL PDF */
+        // OBSERVACIONES 
         $observaciones = explode("\n",$comprobantes[0]->observaciones);
 
-        /* FICHA TECNICA */
+        // FICHA TECNICA 
+        $arrayFT = json_decode($arrayFichaTecnica, true);
+        $fichaTecnica = 0;
+        foreach ($arrayFT as $i => $row)
+        {
+            if($row['EnvioFicha'] == 1)
+            {
+                $fichaTecnica = 1;
+                break;
+            }
+        }
+
         if($fichaTecnica == 1) {
-            $pdf = PDF::loadView('pdfFichaTecnica', compact('detallesComprobantes', 'comprobantes', 'condComercial', 'fechaEntrega', 'observaciones'))
+            $pdf = PDF::loadView('pdfFichaTecnica', compact('detallesComprobantes', 'arrayFT', 'comprobantes', 'condComercial', 'fechaEntrega', 'observaciones'))
                    ->setPaper('a4', 'landscape');
         }
         else {

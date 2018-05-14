@@ -203,7 +203,7 @@ class Clientes extends Model
             $success = true;
         }catch(\Exception $e){
             $success = false;
-            $error = false; //$e->getMessage();
+            $error = $e->getMessage();
             DB::rollback();
         }
 

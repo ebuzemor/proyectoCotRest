@@ -111,12 +111,15 @@ class CotizacionController extends Controller
 
     public function enviarMail(Request $request)
     {        
-        try {
+        try 
+        {            
             $pdf = Cotizacion::descargarPDF($request->claveEF_Empresa, $request->claveComprobante, $request->fichaTecnica);
             $correos = explode(",", $request->emails);
             Mail::to($correos)->send(new Reminder($pdf, $request->claveComprobante));
             $success = true;
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             report($e);
             return false;
         }
@@ -125,9 +128,9 @@ class CotizacionController extends Controller
         }       
     }
 
-    public function descargarPDF($claveEF_Empresa, $claveComprobante, $fichaTecnica)
+    public function descargarPDF(Request $request)
     {
-        $datos = Cotizacion::descargarPDF($claveEF_Empresa, $claveComprobante, $fichaTecnica);
+        $datos = Cotizacion::descargarPDF($request->claveEF_Empresa, $request->claveComprobante, $request->fichaTecnica);
         return $datos->download();
     }
 }

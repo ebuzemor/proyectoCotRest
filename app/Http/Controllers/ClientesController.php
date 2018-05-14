@@ -38,14 +38,14 @@ class ClientesController extends Controller
                 'mily',//$obj->usuario,// *default
                 '3001',//$obj->claveInmueble,// *opcional
                 $obj->razonsocial,
-                $obj->rfc,
+                ($obj->rfc == null || $obj->rfc == "") ? "XAXX010101000" : $obj->rfc,
                 $obj->correoElectronico,
                 $obj->personaFisica,
                 '100000205',//$obj->claveEF_Empresa, // *default
                 $obj->calle,
                 $obj->numeroExterior,
                 $obj->numeroInterior,
-                $obj->colonia,
+                ($obj->colonia == null || $obj->colonia == "") ? "-" : $obj->colonia,
                 $obj->localidad,
                 $obj->municipio,
                 '15',//$obj->claveEstado, //*opcional
