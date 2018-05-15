@@ -17,8 +17,8 @@ class HistorialCliente extends Model
 						    , co.claveEntidadFiscalCliente
 						    , cm.claveEntidadFiscalInmueble 
 						    , cm.claveEntidadFiscalResponsable
-						    , date(co.fechaVigencia) as fechaVigencia
-						    , date(cm.fechaEmision) as fechaEmision 
+						    , DATE(co.fechaVigencia) as fechaVigencia
+						    , DATE(cm.fechaEmision) as fechaEmision 
 						    , ct.codigoDeCliente
 						    , ef.rfc
 						    , ef.razonSocial
@@ -47,35 +47,29 @@ class HistorialCliente extends Model
     {
     	$consulta = DB::connection('copico')->
     				select(
-	    				"SELECT 
-						    co.claveComprobanteDeCotizacion
-						    , cm.codigoDeComprobante
-						    , co.claveEntidadFiscalCliente
-						    , cm.claveEntidadFiscalInmueble 
-						    , cm.claveEntidadFiscalResponsable
-						    , date(co.fechaVigencia) as fechaVigencia
-						    , date(cm.fechaEmision) as fechaEmision 
-						    , ct.codigoDeCliente
-						    , ef.rfc
-						    , ef.razonSocial
-						    , ef.correoElectronico
-						    , cm.partidas
-						    , tc.descripcion AS estatus 
-						    , tc.claveTipoDeStatusDeComprobante AS claveEstatus
-						    , co.subtotal
-						    , co.descuento
-						    , co.impuesto
-						    , co.total
-						    , co.observaciones
-						 FROM cotizaciones co
-						 JOIN comprobantes cm ON co.claveComprobanteDeCotizacion = cm.claveComprobante
-						 JOIN clientes ct USING (claveEntidadFiscalCliente)
-						 JOIN entidadesfiscales ef ON co.claveEntidadFiscalCliente = ef.claveEntidadFiscal
-						 JOIN tiposdestatusdecomprobantes tc USING (claveTipoDeStatusDeComprobante)
-						 WHERE tc.claveTipoDeStatusDeComprobante = 164
-						 AND cm.claveEntidadFiscalInmueble = $claveEF_Inmueble
-						 AND DATE(cm.fechaEmision) BETWEEN '$fechaInicio' AND '$fechaFinal'
-						 AND co.claveEntidadFiscalCliente = $claveEF_Cliente");
+	    				"SELECT
+							cm.claveComprobante 
+							, cm.codigoDeComprobante AS codigoCotizacion
+							, cf.claveComprobanteFiscal
+							, cp.codigoDeComprobante AS codigoFactura
+							, DATE(cm.fechaEmision) AS fechaEmision
+							, DATE(cp.fechaEmision) AS fechaFactura
+							, cf.importeTotal AS total
+							, cf.serie
+							, cf.folio
+							, ef.razonSocial
+						FROM cotizaciones co
+						JOIN comprobantes cm ON co.claveComprobanteDeCotizacion = cm.claveComprobante
+						JOIN tiposdestatusdecomprobantes tc USING (claveTipoDeStatusDeComprobante)
+						JOIN cotizaciones_ventas cv ON cm.claveComprobante = cv.claveComprobanteDeCotizacion
+						JOIN facturas_ventas fv ON cv.claveComprobanteDeVenta = fv.claveComprobanteDeVenta
+						JOIN comprobantesfiscales cf ON fv.claveComprobanteFiscal = cf.claveComprobanteFiscal
+						JOIN comprobantes cp ON cf.claveComprobanteFiscal = cp.claveComprobante
+						JOIN entidadesfiscales ef on cm.claveEntidadFiscalResponsable = ef.claveEntidadFiscal
+						WHERE tc.claveTipoDeStatusDeComprobante = 164 
+						AND cm.claveEntidadFiscalInmueble = $claveEF_Inmueble
+						AND DATE(cp.fechaEmision) BETWEEN '$fechaInicio' AND '$fechaFinal' 
+						AND co.claveEntidadFiscalCliente = $claveEF_Cliente");
 		return $consulta;
     }
 
