@@ -27,40 +27,49 @@ class Reportes extends Model
     					SELECT
 							claveEntidadFiscalUsuario
 							, nickname
+							, nombreVendedor
 							, claveInmueble AS sucursal
 							, SUM(numcotizaciones) AS num_cotizaciones
 							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 160 THEN numcotizaciones ELSE 0 END) AS borrador
-							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 162 THEN numcotizaciones ELSE 0 END) AS definitiva	
-							, SUM(montocotizaciones) AS total_cotizaciones
-							, MAX(montocotizaciones) AS maxima_cotizacion_cliente	
-							, MAX(numcotizaciones) AS total_cotizaciones_cliente
-							, SUM(montodescuentos) AS total_descuentos
-							, SUM(CASE WHEN montodescuentos > 0 THEN montodescuentos ELSE 0 END) AS total_cotizaciones_descuento
-							, MAX(montodescuentos) AS maximo_descuento_cliente
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 161 THEN numcotizaciones ELSE 0 END) AS pendientes
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 162 THEN numcotizaciones ELSE 0 END) AS autorizadas
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 163 THEN numcotizaciones ELSE 0 END) AS canceladas
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 164 THEN numcotizaciones ELSE 0 END) AS facturadas
+							, MAX(numcotizaciones) AS total_ctzs_cte	
+							, SUM(montocotizaciones) AS total_ctzs	
+							, MAX(montocotizaciones) AS max_ctz_cte	 	
+							, SUM(montodescuentos) AS total_desctos
+							, MAX(montodescuentos) AS max_descto_cte
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 164 THEN montocotizaciones ELSE 0 END) AS total_ctzs_fact
+							, MAX(CASE WHEN claveTipoDeStatusDeComprobante = 164 THEN montocotizaciones ELSE 0 END) max_ctz_cte_fact
+							, SUM(CASE WHEN claveTipoDeStatusDeComprobante = 164 THEN montodescuentos ELSE 0 END) AS total_ctzs_descto_fact
+							, MAX(CASE WHEN claveTipoDeStatusDeComprobante = 164 THEN montodescuentos ELSE 0 END) AS max_descto_cte_fact
 						FROM
-							(
-						SELECT 
+						(
+							SELECT 
 								u.claveEntidadFiscalUsuario
 								, u.nickname
+								, f.razonSocial AS nombreVendedor
 								, z.claveEntidadFiscalCliente
-								, e.razonSocial
+								, e.razonSocial AS nombreCliente
 								, c.claveEntidadFiscalInmueble
 								, i.claveInmueble
 								, c.claveTipoDeStatusDeComprobante
 								, COUNT(*) AS numcotizaciones
-								, ROUND(SUM(z.total),2) AS montocotizaciones
-								, ROUND(SUM(z.descuento),2) AS montodescuentos
-						FROM comprobantes c
-						JOIN cotizaciones z ON c.claveComprobante = z.claveComprobanteDeCotizacion
-						JOIN usuarios u ON c.claveEntidadFiscalResponsable = u.claveEntidadFiscalUsuario
-						JOIN entidadesfiscales e ON z.claveEntidadFiscalCliente = e.claveEntidadFiscal
-						JOIN inmuebles i ON c.claveEntidadFiscalInmueble = i.claveEntidadFiscalInmueble
-						WHERE 1 = 1
-						$filtroInmueble
-						$filtroUsuario
-						$filtroFechas
-						GROUP BY u.nickname, c.claveTipoDeStatusDeComprobante, z.claveEntidadFiscalCliente, e.razonSocial, i.claveInmueble
-							) AS x
+								, ROUND(SUM(z.total), 2) AS montocotizaciones
+								, ROUND(SUM(z.descuento), 2) AS montodescuentos
+							FROM comprobantes c
+							JOIN cotizaciones z ON c.claveComprobante = z.claveComprobanteDeCotizacion
+							JOIN usuarios u ON c.claveEntidadFiscalResponsable = u.claveEntidadFiscalUsuario
+							JOIN entidadesfiscales e ON z.claveEntidadFiscalCliente = e.claveEntidadFiscal
+							JOIN entidadesfiscales f ON c.claveEntidadFiscalResponsable = f.claveEntidadFiscal
+							JOIN inmuebles i ON c.claveEntidadFiscalInmueble = i.claveEntidadFiscalInmueble
+							WHERE 1 = 1
+							$filtroInmueble
+							$filtroUsuario
+							$filtroFechas
+							GROUP BY u.nickname, c.claveTipoDeStatusDeComprobante, z.claveEntidadFiscalCliente, e.razonSocial, i.claveInmueble
+						) AS x
 						GROUP BY claveEntidadFiscalUsuario, claveInmueble
     					");
 

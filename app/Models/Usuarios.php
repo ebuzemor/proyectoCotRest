@@ -17,10 +17,11 @@ class Usuarios extends Model
     	$consulta = DB::connection('copico')->
     					select("SELECT 
 								us.claveEntidadFiscalUsuario AS claveEntidadFiscalEmpleado
-								, us.nickname AS nombreUsuario 
+								, us.nickname AS nombreUsuario
+								, eu.razonSocial AS razonSocialUsuario 
 								, em.numeroDeEmpresa AS empresa
 								, em.claveEntidadFiscalEmpresa
-								, ef.razonSocial
+								, ef.razonSocial AS razonSocialEmpresa
 								, im.claveInmueble AS sucursal
 								, im.nombreCorto
 								, im.claveEntidadFiscalInmueble
@@ -29,6 +30,7 @@ class Usuarios extends Model
 								LEFT JOIN empresas em USING(claveEntidadFiscalEmpresa)
 								LEFT JOIN entidadesFiscales ef ON em.claveEntidadFiscalEmpresa = ef.claveEntidadFiscal
 								LEFT JOIN inmuebles im USING(claveEntidadFiscalEmpresa)
+								LEFT JOIN entidadesFiscales eu on us.claveEntidadFiscalUsuario = eu.claveEntidadFiscal
 								INNER JOIN inmueblesautorizados au ON im.claveEntidadFiscalInmueble = au.claveEntidadFiscalInmueble 
 									AND us.claveEntidadFiscalUsuario = au.claveEntidadFiscalUsuario 
 									AND em.claveEntidadFiscalEmpresa = au.claveEntidadFiscalEmpresa
