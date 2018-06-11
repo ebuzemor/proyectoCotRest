@@ -58,4 +58,8 @@ Route::group(['middleware' => 'auth:api'], function() {
 	//REPORTES
 	Route::post('/listaCotizacionesUsr', 'ReportesController@listaCotizaciones');
 	Route::post('/reporteCotizacionesUsr', 'ReportesController@reporteCotizaciones');
+	Route::post('/datosClienteMaxCtz', 'ReportesController@datosClienteMaxCtz');
+	Route::post('/datosClienteDscMax', 'ReportesController@datosClienteDscMax');
+	Route::post('/datosClienteMaxFac', 'ReportesController@datosClienteMaxFac');
+	Route::post('/datosClienteDscFac', 'ReportesController@datosClienteDscFac');
 });
