@@ -79,6 +79,7 @@ class HistorialCliente extends Model
     				select("
     					SELECT 
 							cp.claveProducto
+							, cm.codigoDeComprobante
 							, cd.codigoDeProducto
 							, TRIM(Replace(Replace(Replace(cp.descripcion,'\t',''),'\n',''),'\r','')) AS descripcion
 							, pv.precioUnitario
