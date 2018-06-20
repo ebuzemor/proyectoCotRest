@@ -151,7 +151,7 @@ class Reportes extends Model
 						JOIN entidadesfiscales e ON z.claveEntidadFiscalCliente = e.claveEntidadFiscal
 						JOIN entidadesfiscales f ON c.claveEntidadFiscalResponsable = f.claveEntidadFiscal
 						JOIN inmuebles i ON c.claveEntidadFiscalInmueble = i.claveEntidadFiscalInmueble
-						WHERE c.claveTipoDeStatusDeComprobante IN (160, 161, 162)
+						WHERE c.claveTipoDeStatusDeComprobante IN (160, 161, 162, 163, 164)
 						$filtroInmueble
 						$filtroUsuario
 						$filtroFechas
@@ -195,7 +195,7 @@ class Reportes extends Model
 						JOIN entidadesfiscales e ON z.claveEntidadFiscalCliente = e.claveEntidadFiscal
 						JOIN entidadesfiscales f ON c.claveEntidadFiscalResponsable = f.claveEntidadFiscal
 						JOIN inmuebles i ON c.claveEntidadFiscalInmueble = i.claveEntidadFiscalInmueble
-						WHERE c.claveTipoDeStatusDeComprobante IN (160, 161, 162)
+						WHERE c.claveTipoDeStatusDeComprobante IN (160, 161, 162, 163, 164)
 						$filtroInmueble
 						$filtroUsuario
 						$filtroFechas
