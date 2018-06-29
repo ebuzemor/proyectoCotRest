@@ -73,7 +73,7 @@ class Usuarios extends Model
 								, s.descripcion
 								, s.constante
 							FROM seccionesdesubmodulos s
-							JOIN submodulos b ON s.claveSubmodulo=b.claveSubmodulo
+							JOIN submodulos b ON s.claveSubmodulo = b.claveSubmodulo
 							WHERE b.claveAplicacion = $claveAplicacion
     						");
     	return $consulta;
@@ -88,8 +88,10 @@ class Usuarios extends Model
 								, u.nickname
 								, e.razonSocial
 							FROM usuarios u
-							JOIN entidadesfiscales e ON u.claveEntidadFiscalUsuario=e.claveEntidadFiscal
+							JOIN entidadesfiscales e ON u.claveEntidadFiscalUsuario = e.claveEntidadFiscal
+							JOIN usuarios_empresas m ON u.claveEntidadFiscalUsuario = m.claveEntidadFiscalUsuario
 							WHERE u.activado = 1 AND (u.nickname LIKE '%$txtBusqueda%' OR e.razonSocial LIKE '%$txtBusqueda%')
+							AND m.claveEntidadFiscalEmpresa = 100000205
     						");
     	return $consulta;
     }
