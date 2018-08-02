@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        'App\Console\Commands\SincronizacionCommand'
     ];
 
     /**
@@ -24,8 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+         $schedule->command('cronExecSync:Sincronizacion')->everyMinute();//hourly();
+         // * * * * * php /var/www/cotizador_src/artisan schedule:run 1>> /dev/null 2>&1
     }
 
     /**
