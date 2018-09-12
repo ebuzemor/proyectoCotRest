@@ -182,7 +182,7 @@ class Productos extends Model
 	{
 		$filtroInmueble = "";
 		if($claveEF_Inmueble != null && $claveEF_Inmueble != 0)
-			$filtroInmueble = " AND m.claveEntidadFiscalInmueble = $claveEF_Inmueble";
+			$filtroInmueble = " AND r.claveEntidadFiscalInmueble = $claveEF_Inmueble";
 
 		$consulta = DB::connection('copico')->
 					select("
@@ -201,6 +201,7 @@ class Productos extends Model
 						FROM codigosdeproductos c
 						LEFT JOIN movimientosdeinventarios m ON c.claveProducto = m.claveProducto
 						LEFT JOIN preciosdeventa p ON c.claveProducto = p.claveProducto
+						LEFT JOIN productosvendibles r ON c.claveProducto = r.claveProducto
 						LEFT JOIN listasdeprecios l ON p.claveListaDePrecios = l.claveListaDePrecios
 						LEFT JOIN backordersdeproductos_web b ON c.claveProducto = b.claveproducto
 						LEFT JOIN visibilidaddeproductos_web v ON c.claveProducto = v.claveproducto

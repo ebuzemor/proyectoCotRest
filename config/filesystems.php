@@ -65,8 +65,10 @@ return [
 
         'ftp' => [
             'driver' => 'ftp',
-            'host' => '77.104.152.233',
-            'username' => 'aprosierp@sixplus1.mx',
+            //'host' => '77.104.152.233',            
+            //'username' => 'aprosierp@sixplus1.mx',
+            'host' => '104.207.241.183',
+            'username' => 'aprosierp@aprosi.com.mx',
             'password' => '(06tn@Hd]*b_'
         ],
 
