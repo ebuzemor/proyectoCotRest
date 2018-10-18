@@ -26,8 +26,7 @@ class CotizacionController extends Controller
 
     public function obtenerTipoEstatusCtz()
     {
-    	$response = TipoEstatusCtz::where('claveTipoDeComprobante', 16)->limit(3)->get();
-        //$response = TipoEstatusCtz::where('claveTipoDeComprobante', 16)->get();
+    	$response = TipoEstatusCtz::where('claveTipoDeComprobante', 16)->whereNotIn('claveTipoDeStatusDeComprobante', [163])->get();
     	return response()->json($response, ApiStatus::OK);
     }
 

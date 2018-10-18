@@ -375,7 +375,7 @@ class Cotizacion extends Model
                         JOIN clientes ct USING (claveEntidadFiscalCliente)
                         JOIN entidadesfiscales ef ON co.claveEntidadFiscalCliente = ef.claveEntidadFiscal
                         JOIN tiposdestatusdecomprobantes tc USING (claveTipoDeStatusDeComprobante)
-                        WHERE tc.claveTipoDeStatusDeComprobante IN (160, 161, 162) AND
+                        WHERE tc.claveTipoDeStatusDeComprobante NOT IN (163) AND
                         cm.claveEntidadFiscalInmueble = $claveEF_Inmueble
                         $filtroResponsable
                         $filtroFechas
